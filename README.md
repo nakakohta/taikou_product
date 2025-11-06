@@ -4,7 +4,7 @@
 
 
 my name takashi!!!!!!!
-
+nakanakaT
 I'm Reika!
 "my name is arudel"
 
