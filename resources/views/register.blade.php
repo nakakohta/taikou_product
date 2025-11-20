@@ -154,7 +154,7 @@
 <div class="wrapper">
 
     <div class="cat-image">
-        <img src="{{ asset('images/cat.png') }}" alt="にゃんこ">
+        <img src="{{ asset('images/アイコン.png') }}" alt="アイコン">
     </div>
 
     <h1>新規登録</h1>
