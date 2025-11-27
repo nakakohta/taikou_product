@@ -30,8 +30,8 @@
         }
 
         .left-thumb {
-            width: 380px;
-            height: 380px;
+            width: 280px;
+            height: 280px;
             background: #eef6ff;
             border-radius: 16px;
             display: flex;
@@ -83,48 +83,60 @@
             border-top: 2px solid #d4e9ff;
         }
 
+        /* コメント表示 */
         .comment-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: #3b82f6;
         }
 
         .comment-box {
             border: 2px solid #d4e9ff;
             border-radius: 12px;
-            padding: 12px;
+            padding: 15px;
             margin-bottom: 15px;
+            background: #ffffff;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .comment-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #d4e9ff;
         }
 
         .comment-name {
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .comment-stars {
-            font-size: 22px;
-            color: #fbbf24;
+            color: #374151;
         }
 
         .comment-text {
             font-size: 15px;
+            color: #374151;
         }
-
     </style>
 </head>
 <body>
 
 <div class="container">
 
+    <!-- 上部：曲情報 -->
     <div class="top-area">
 
-        <!-- 左：サムネ -->
         <div class="left-thumb">
             <img src="{{ asset('storage/' . $music->thumbnail) }}" alt="サムネ">
         </div>
 
-        <!-- 右：情報 -->
         <div class="right-info">
             <div class="title">{{ $music->title }}</div>
 
@@ -132,7 +144,6 @@
                 {{ $music->description }}
             </div>
 
-            <!-- ★レビュー平均を動的表示 -->
             @php
                 $avg = $reviews->avg('rating') ?? 0;
             @endphp
@@ -142,7 +153,7 @@
                     @if($i <= $avg)
                         ★
                     @else
-                        <span style="color: #d1d5db;">★</span>
+                        <span style="color:#d1d5db;">★</span>
                     @endif
                 @endfor
             </div>
@@ -157,28 +168,28 @@
     <hr>
 
     <!-- コメント一覧 -->
-    <div class="comment-title">コメント</div>
+    <div class="comment-title">コメント一覧</div>
 
     @foreach ($comments as $comment)
         <div class="comment-box">
-            <div class="comment-name">
-                {{ $comment->name }}　
 
-                <!-- コメントごとの星評価 -->
-                <span class="comment-stars">
-                    @for ($i=1; $i<=5; $i++)
-                        @if ($i <= $comment->rating)
-                            ★
-                        @else
-                            <span style="color:#d1d5db;">★</span>
-                        @endif
-                    @endfor
-                </span>
+            <div class="comment-header">
+
+                <!-- アイコン（ユーザープロフィールから） -->
+                <img src="{{ asset('storage/icons/' . ($comment->user->icon ?? 'default_icon.png')) }}"
+                     class="comment-icon">
+
+                <!-- 名前（ユーザープロフィールから） -->
+                <div class="comment-name">
+                    {{ $comment->user->name }}
+                </div>
+
             </div>
 
             <div class="comment-text">
-                {{ $comment->comment ?? $comment->content }}
+                {{ $comment->comment }}
             </div>
+
         </div>
     @endforeach
 
