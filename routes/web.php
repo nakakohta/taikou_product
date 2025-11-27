@@ -26,3 +26,8 @@ Route::get('/register', [RegisterController::class, 'show'])
 // 新規登録処理
 Route::post('/register', [RegisterController::class, 'store'])
     ->name('register.store');
+
+
+Route::get('/profile', function () {
+    return view('profile');
+});
