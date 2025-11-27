@@ -1,13 +1,21 @@
 <?php
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\MusicController;
+// 曲投稿ページ
+Route::get('/songs/create', function () {
+    return 'ここに曲投稿ページを作る';
+})->name('songs.create');
 
-// トップページ
-Route::get('/', function () {
-    return view('welcome');
-});
+// ログインページ（ダミー）
+Route::get('/login', function () {
+    return 'ここにログインページを作る';
+})->name('login');
+
+// 新規登録ページ（ダミー）
+Route::get('/register', function () {
+    return 'ここに新規登録ページを作る';
+})->name('register');  
+// Auth::routes();  ← 今はコメントアウト or 削除でOK
 
 // 新規登録画面
 Route::get('/register', [RegisterController::class, 'show'])
@@ -25,3 +33,4 @@ Route::get('/music/{id}', [MusicController::class, 'show'])
 Route::post('/music/{id}/comment', [MusicController::class, 'storeComment'])
     ->middleware('auth')
     ->name('comment.store');
+
