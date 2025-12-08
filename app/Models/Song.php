@@ -16,7 +16,9 @@ class Song extends Model
         'title',
         'artist',
         'comment',
+        'thumbnail',   // ← 追加
     ];
+
 
     public function genre()
     {

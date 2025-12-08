@@ -1,159 +1,160 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ $music->title }}</title>
+@extends('layouts.app')
 
-    <style>
-        body {
-            background: #f5faff;
-            font-family: "Zen Maru Gothic", sans-serif;
-            margin: 0;
-            padding: 30px;
-            display: flex;
-            justify-content: center;
-        }
+@section('content')
 
-        .container {
-            width: 100%;
-            max-width: 1100px;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            border: 2px solid #d4e9ff;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
+<style>
+/* ============================
+   曲ページデザイン（ライト / ダーク対応）
+============================ */
 
-        .top-area {
-            display: flex;
-            gap: 40px;
-        }
+.music-container {
+    max-width: 1100px;
+    margin: 30px auto;
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    box-shadow: 0 6px 18px var(--shadow);
+}
 
-        .left-thumb {
-            width: 280px;
-            height: 280px;
-            background: #eef6ff;
-            border-radius: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border: 2px solid #d4e9ff;
-        }
+/* 上部レイアウト */
+.music-top {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+}
 
-        .left-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+.thumbnail {
+    width: 280px;
+    height: 280px;
+    background: #eef6ff;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    overflow: hidden;
+}
 
-        .right-info {
-            flex: 1;
-        }
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-        .title {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #3b82f6;
-        }
+.music-info {
+    flex: 1;
+}
 
-        .desc-box {
-            background: #f0f8ff;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px solid #d4e9ff;
-            margin-bottom: 20px;
-        }
+.music-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--text-blue);
+    margin-bottom: 15px;
+}
 
-        .review-stars {
-            font-size: 30px;
-            color: #fbbf24;
-        }
+.music-desc {
+    background: var(--bg);
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    margin-bottom: 20px;
+}
 
-        .review-count {
-            margin-top: 6px;
-            font-size: 14px;
-            color: #6b7280;
-        }
+/* レビュー表示 */
+.stars {
+    font-size: 28px;
+    color: #fbbf24;
+}
 
-        hr {
-            margin: 30px 0;
-            border: none;
-            border-top: 2px solid #d4e9ff;
-        }
+.review-count {
+    color: var(--text);
+    margin-top: 6px;
+}
 
-        /* コメント表示 */
-        .comment-title {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #3b82f6;
-        }
+/* 区切り線 */
+.line {
+    border-top: 2px solid var(--border);
+    margin: 30px 0;
+}
 
-        .comment-box {
-            border: 2px solid #d4e9ff;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background: #ffffff;
-        }
+/* コメント一覧 */
+.comment-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--text-blue);
+    margin-bottom: 15px;
+}
 
-        .comment-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
+.comment-box {
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+}
 
-        .comment-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #d4e9ff;
-        }
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
 
-        .comment-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #374151;
-        }
+.comment-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+}
 
-        .comment-text {
-            font-size: 15px;
-            color: #374151;
-        }
-    </style>
-</head>
-<body>
+.comment-name {
+    font-weight: bold;
+    font-size: 15px;
+}
 
-<div class="container">
+.comment-text {
+    font-size: 15px;
+    color: var(--text);
+}
 
-    <!-- 上部：曲情報 -->
-    <div class="top-area">
+/* スマホ対応 */
+@media (max-width: 768px) {
+    .music-top {
+        flex-direction: column;
+        align-items: center;
+    }
+    .thumbnail {
+        width: 90%;
+        max-width: 320px;
+        height: auto;
+    }
+}
+</style>
 
-        <div class="left-thumb">
+
+<div class="music-container">
+
+    <!-- 上部：サムネ＋情報 -->
+    <div class="music-top">
+
+        <div class="thumbnail">
             <img src="{{ asset('storage/' . $music->thumbnail) }}" alt="サムネ">
         </div>
 
-        <div class="right-info">
-            <div class="title">{{ $music->title }}</div>
+        <div class="music-info">
+            <div class="music-title">{{ $music->title }}</div>
 
-            <div class="desc-box">
+            <div class="music-desc">
                 {{ $music->description }}
             </div>
 
-            @php
-                $avg = $reviews->avg('rating') ?? 0;
-            @endphp
+            @php $avg = $reviews->avg('rating') ?? 0; @endphp
 
-            <div class="review-stars">
+            <div class="stars">
                 @for($i=1; $i<=5; $i++)
                     @if($i <= $avg)
                         ★
                     @else
-                        <span style="color:#d1d5db;">★</span>
+                        <span style="color:#94a3b8;">★</span>
                     @endif
                 @endfor
             </div>
@@ -161,11 +162,10 @@
             <div class="review-count">
                 レビュー {{ $reviews->count() }}件
             </div>
-
         </div>
     </div>
 
-    <hr>
+    <div class="line"></div>
 
     <!-- コメント一覧 -->
     <div class="comment-title">コメント一覧</div>
@@ -174,26 +174,23 @@
         <div class="comment-box">
 
             <div class="comment-header">
+                @if ($comment->user && $comment->user->icon)
+                    <img src="{{ asset('storage/' . $comment->user->icon) }}" class="comment-icon">
+                @else
+                    <img src="{{ asset('images/default_icon.png') }}" class="comment-icon">
+                @endif
 
-                <!-- アイコン（ユーザープロフィールから） -->
-                <img src="{{ asset('storage/icons/' . ($comment->user->icon ?? 'default_icon.png')) }}"
-                     class="comment-icon">
-
-                <!-- 名前（ユーザープロフィールから） -->
                 <div class="comment-name">
-                    {{ $comment->user->name }}
+                    {{ $comment->user->name ?? '名無し' }}
                 </div>
-
             </div>
 
             <div class="comment-text">
                 {{ $comment->comment }}
             </div>
-
         </div>
     @endforeach
 
 </div>
 
-</body>
-</html>
+@endsection
