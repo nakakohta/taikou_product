@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Song;
+
 use Illuminate\Support\Facades\Auth;
 
 class SongController extends Controller
@@ -42,3 +43,4 @@ class SongController extends Controller
         return redirect()->route('songs.create')->with('success', '曲を投稿しました！');
     }
 }
+
