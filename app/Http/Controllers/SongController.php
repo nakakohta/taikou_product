@@ -4,50 +4,43 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Song;
-use App\Models\Genre;
+
+use Illuminate\Support\Facades\Auth;
 
 class SongController extends Controller
 {
-    /**
-     * 曲投稿フォーム表示
-     */
     public function create()
     {
-        $genres = Genre::all();
-        return view('songs.create', compact('genres'));
+        return view('songs.create');
     }
 
-    /**
-     * 曲保存処理
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title'     => 'required|string|max:255',
-            'artist'    => 'required|string|max:255',
-            'genre_id'  => 'required|integer',
-            'url'       => 'required|string|max:500',
-            'comment'   => 'nullable|string',
-            'thumbnail' => 'nullable|image|max:4096',
+        $request->validate([
+            'url' => 'required|url|max:500',
+            'title' => 'required|string|max:255',
+            'artist' => 'required|string|max:255',
+            'genres' => 'required|array',
+            'comment' => 'required|string|max:1000',
         ]);
 
-        // サムネイル画像保存
-        $thumbnailPath = null;
-        if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+        $selectedGenres = $request->genres;
+        if (in_array('その他', $selectedGenres) && $request->filled('genre_other_text')) {
+            $selectedGenres = array_diff($selectedGenres, ['その他']);
+            $selectedGenres[] = $request->genre_other_text;
         }
 
-        // 保存処理
         Song::create([
-            'title'     => $request->title,
-            'artist'    => $request->artist,
-            'genre_id'  => $request->genre_id,
-            'url'       => $request->url,
-            'comment'   => $request->comment,
-            'thumbnail' => $thumbnailPath,
-            'user_id'   => auth()->id() ?? 0,
+            'user_id' => Auth::id(),
+            'genre_id' => 1,
+            'url' => $request->url,
+            'title' => $request->title,
+            'artist' => $request->artist,
+            'genre' => implode(', ', $selectedGenres),
+            'comment' => $request->comment,
         ]);
 
-        return redirect()->route('home')->with('success', '曲を投稿しました！');
+        return redirect()->route('songs.create')->with('success', '曲を投稿しました！');
     }
 }
+

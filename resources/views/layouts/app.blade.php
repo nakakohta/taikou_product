@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja" data-theme="{{ session('theme', 'light') }}">
 <head>
     <meta charset="UTF-8">
@@ -31,3 +32,4 @@
 
 </body>
 </html>
+
