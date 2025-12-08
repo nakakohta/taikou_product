@@ -1,217 +1,214 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="{{ session('theme', 'light') }}">
 <head>
     <meta charset="UTF-8">
-    <title>好きな曲投稿サイト - トップ</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>対抗 | ホーム</title>
 
     <style>
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            margin: 0;
-            background-color: #f7fafc;
+        :root {
+            --bg: #f0f6ff;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-blue: #2563eb;
+            --border: #d4e9ff;
         }
+
+        /* ダークモード */
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f1f5f9;
+            --text-blue: #60a5fa;
+            --border: #334155;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: "Zen Maru Gothic", sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text);
+        }
+
         header {
-            background-color: #1a202c;
-            color: #fff;
-            padding: 12px 24px;
+            background: var(--card-bg);
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 2px solid var(--border);
         }
-        header .site-title {
-            font-size: 20px;
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            height: 56px;
+            width: 56px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .logo-text {
+            font-size: 26px;
             font-weight: bold;
+            color: var(--text-blue);
         }
-        header .nav-buttons a {
-            color: #1a202c;
-            background-color: #edf2f7;
-            padding: 6px 12px;
-            border-radius: 4px;
+
+        nav a {
+            margin-left: 20px;
+            color: var(--text-blue);
+            font-size: 16px;
+            font-weight: bold;
             text-decoration: none;
-            margin-left: 8px;
-            font-size: 14px;
         }
-        main {
-            max-width: 1100px;
-            margin: 24px auto;
-            padding: 0 16px 24px;
+
+        .wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
-        .post-button-wrapper {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .post-button-wrapper a {
-            background-color: #3182ce;
-            color: #fff;
-            padding: 10px 20px;
-            font-weight: bold;
+
+        .btn-post {
             display: inline-block;
-            border-radius: 9999px;
+            padding: 14px 34px;
+            background: var(--text-blue);
+            border-radius: 28px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
             text-decoration: none;
+            margin-bottom: 30px;
         }
-        .post-button-wrapper a:hover {
-            background-color: #2b6cb0;
+
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--text-blue);
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .section {
-            background-color: #fff;
-            padding: 16px 20px;
-            margin-bottom: 16px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+
+        .ranking-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 14px;
         }
-        .section h2 {
+
+        .rank-badge {
+            width: 52px;
+            height: 52px;
+            background: #60a5fa;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-title {
             font-size: 18px;
-            margin-top: 0;
-            border-left: 4px solid #3182ce;
-            padding-left: 8px;
+            font-weight: bold;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        th, td {
-            padding: 8px;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-        }
-        thead {
-            background-color: #edf2f7;
-        }
-        .label-genre {
-            background-color: #ebf8ff;
-            color: #2b6cb0;
-            padding: 2px 8px;
-            border-radius: 9999px;
+
+        .genre-tag {
+            background: var(--border);
+            padding: 4px 10px;
+            border-radius: 10px;
             font-size: 12px;
         }
-        .muted {
-            font-size: 13px;
-            color: #718096;
+
+        .song-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
         }
-        .stars {
-            color: gold;
-            font-size: 16px;
+
+        .song-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 14px;
+            border-radius: 14px;
+        }
+
+        .song-link {
+            color: var(--text-blue);
+            font-size: 14px;
         }
     </style>
 </head>
+
 <body>
 
 <header>
-    <div class="site-title">
-        好きな曲シェアサイト
+    <div class="logo-area">
+        <img src="{{ asset('images/アイコン.png') }}" class="logo-img">
+        <div class="logo-text">対抗 - Taikou</div>
     </div>
-    <div class="nav-buttons">
+
+    <nav>
         <a href="{{ route('login') }}">ログイン</a>
-        <a href="{{ route('register') }}">新規登録</a>
-    </div>
+        <a href="{{ route('register.show') }}">新規登録</a>
+    </nav>
 </header>
 
-<main>
+<div class="wrapper">
 
-    {{-- 曲投稿ボタン --}}
-    <div class="post-button-wrapper">
-        <a href="{{ route('songs.create') }}">好きな曲を投稿する</a>
-        <p class="muted">※1ユーザー3曲まで投稿できます（投稿処理側で制限）</p>
+    <a href="{{ route('songs.create') }}" class="btn-post">＋ 曲を投稿する</a>
+
+    <!-- ランキング -->
+    <h2 class="section-title">
+        <img src="{{ asset('images/トロフィー.png') }}" style="height:28px;">
+        今日のランキング TOP5
+    </h2>
+
+    @foreach ($dailyRanking->take(5) as $index => $song)
+        <div class="ranking-card">
+            <div class="rank-badge">{{ $index + 1 }}</div>
+
+            <div class="song-info">
+                <div class="song-title">{{ $song->title }}</div>
+                <div>by {{ $song->artist }}</div>
+                <div class="genre-tag">{{ $song->genre->name }}</div>
+            </div>
+
+            <a href="{{ route('music.show', $song->id) }}" class="song-link">▶ 曲ページへ</a>
+        </div>
+    @endforeach
+
+    <!-- 最近投稿 -->
+    <h2 class="section-title">
+        <img src="{{ asset('images/ニューアイコン.png') }}" style="height:26px;">
+        最近投稿された曲
+    </h2>
+
+    <div class="song-list">
+        @foreach ($recentSongs as $song)
+            <div class="song-card">
+                <span class="genre-tag">{{ $song->genre->name }}</span>
+                <div class="song-title">{{ $song->title }}</div>
+                <div>by {{ $song->artist }}</div>
+                <a href="{{ route('music.show', $song->id) }}" class="song-link">▶ 曲ページへ</a>
+            </div>
+        @endforeach
     </div>
 
-    {{-- 今日の5つ星ランキング --}}
-    <section class="section">
-        <h2>本日の5つ星ランキング</h2>
-
-        @if ($dailyRanking->isEmpty())
-            <p class="muted">まだ本日の評価がありません。</p>
-        @else
-            <table>
-                <thead>
-                    <tr>
-                        <th>順位</th>
-                        <th>曲名</th>
-                        <th>アーティスト</th>
-                        <th>ジャンル</th>
-                        <th>平均評価</th>
-                        <th>今日の投票数</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($dailyRanking as $index => $song)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>
-                                <a href="{{ $song->url }}" target="_blank">
-                                    {{ $song->title }}
-                                </a>
-                            </td>
-                            <td>{{ $song->artist }}</td>
-                            <td>
-                                @if($song->genre)
-                                    <span class="label-genre">{{ $song->genre->name }}</span>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td>
-                                @php
-                                    $avg = round($song->avg_rating ?? 0, 1);
-                                    $fullStars = floor($avg);
-                                @endphp
-                                <span class="stars">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        {{ $i <= $fullStars ? '★' : '☆' }}
-                                    @endfor
-                                </span>
-                                <span class="muted">({{ $avg }} / 5)</span>
-                            </td>
-                            <td>{{ $song->today_vote_count }} 件</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </section>
-
-    {{-- 最近投稿された曲 --}}
-    <section class="section">
-        <h2>最近投稿された曲</h2>
-
-        @if ($recentSongs->isEmpty())
-            <p class="muted">まだ曲が投稿されていません。</p>
-        @else
-            <table>
-                <thead>
-                    <tr>
-                        <th>投稿日時</th>
-                        <th>曲名</th>
-                        <th>アーティスト</th>
-                        <th>ジャンル</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($recentSongs as $song)
-                        <tr>
-                            <td>{{ $song->created_at->format('Y-m-d H:i') }}</td>
-                            <td>
-                                <a href="{{ $song->url }}" target="_blank">
-                                    {{ $song->title }}
-                                </a>
-                            </td>
-                            <td>{{ $song->artist }}</td>
-                            <td>
-                                @if($song->genre)
-                                    <span class="label-genre">{{ $song->genre->name }}</span>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </section>
-
-</main>
+</div>
 
 </body>
 </html>
