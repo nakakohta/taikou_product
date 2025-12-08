@@ -50,9 +50,18 @@ Route::get('/register', [RegisterController::class, 'show'])
 Route::post('/register', [RegisterController::class, 'store'])
     ->name('register.store');
 
+
 // -------------------------------------------
 // 曲ページ表示
 // -------------------------------------------
+
+
+
+Route::get('/profile', function () {
+    return view('profile');
+});
+// 🎵 曲ページ表示
+
 Route::get('/music/{id}', [MusicController::class, 'show'])
     ->name('music.show');
 
