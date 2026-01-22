@@ -44,3 +44,13 @@ class SongController extends Controller
     }
 }
 
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        // ログイン処理
+        // 成功時はホームへリダイレクト
+        return redirect('/');
+    }
+}
+
