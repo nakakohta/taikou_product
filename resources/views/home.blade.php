@@ -177,7 +177,7 @@
         今日のランキング TOP5
     </h2>
 
-    @foreach ($dailyRanking->take(5) as $index => $song)
+    <!-- @foreach ($dailyRanking->take(5) as $index => $song)
         <div class="ranking-card">
             <div class="rank-badge">{{ $index + 1 }}</div>
 
@@ -189,7 +189,7 @@
 
             <a href="{{ route('music.show', $song->id) }}" class="song-link">▶ 曲ページへ</a>
         </div>
-    @endforeach
+    @endforeach -->
 
     <!-- 最近投稿 -->
     <h2 class="section-title">
