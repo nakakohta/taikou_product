@@ -1,82 +1,42 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SongController;
+
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SongController;
 use App\Http\Controllers\MusicController;
 
-// -------------------------------------------
-// トップページ
-// -------------------------------------------
+// トップ
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// -------------------------------------------
-// 曲投稿ページ
-// -------------------------------------------
-Route::get('/songs/create', [SongController::class, 'create'])->name('songs.create');
-Route::post('/songs', [SongController::class, 'store'])->name('songs.store');
+// 認証
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// -------------------------------------------
-// 🎨 テーマ設定ページ（表示）
-// -------------------------------------------
-Route::get('/theme', function () {
-    return view('theme');
-})->name('theme');
+Route::get('/register', fn () => view('register'))->name('register.show');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-// -------------------------------------------
-// 🎨 テーマ切り替え処理（POST）
-// -------------------------------------------
-Route::post('/theme/change', function (\Illuminate\Http\Request $request) {
-    $theme = $request->input('theme', 'light');
-    session(['theme' => $theme]);
-    return back();
-})->name('theme.change');
+// 曲ページ（閲覧）
+Route::get('/music/{id}', [MusicController::class, 'show'])->name('music.show');
 
-// -------------------------------------------
-// 曲投稿ページ（仮表示） ←★ これを追加！
-// -------------------------------------------
-//Route::get('/songs/create', function () {
-  //  return 'ここに曲投稿ページを作る（仮ページ）';
-//})->name('songs.create');
+// ✅ ログイン必須
+Route::middleware('auth')->group(function () {
 
-// -------------------------------------------
-// ログイン（ダミー）
-// -------------------------------------------
-Route::get('/login', function () {
-    return view('login');
-})->name('login');
+    // プロフィール
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+    Route::post('/profile/icon', [ProfileController::class, 'updateIcon'])->name('profile.icon');
 
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
+    // 曲投稿
+    Route::get('/songs/create', [SongController::class, 'create'])->name('songs.create');
+    Route::post('/songs', [SongController::class, 'store'])->name('songs.store');
 
-// -------------------------------------------
-// 新規登録
-// -------------------------------------------
-Route::get('/register', function () {
-    return view('register');
-})->name('register.show');
+    // コメント投稿
+    Route::post('/music/{id}/comment', [MusicController::class, 'storeComment'])->name('comment.store');
 
-Route::post('/register', [RegisterController::class, 'store'])
-    ->name('register.store');
-
-
-// -------------------------------------------
-// 曲ページ表示
-// -------------------------------------------
-
-
-
-Route::get('/profile', function () {
-    return view('profile');
+    // ★評価（votes） ← これが無いせいで vote.store が未定義になっていました
+    Route::post('/music/{id}/vote', [MusicController::class, 'storeVote'])->name('vote.store');
 });
-// 🎵 曲ページ表示
-
-Route::get('/music/{id}', [MusicController::class, 'show'])
-    ->name('music.show');
-
-// -------------------------------------------
-// コメント投稿（ログイン必須）
-// -------------------------------------------
-Route::post('/music/{id}/comment', [MusicController::class, 'storeComment'])
-    ->middleware('auth')
-    ->name('comment.store');
