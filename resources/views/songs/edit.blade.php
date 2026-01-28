@@ -32,12 +32,12 @@ textarea{ min-height:120px; }
 }
 .genre-btn.active{ background:#3b82f6; color:#fff; border-color:#3b82f6; }
 
-/* プレビュー（はみ出し防止） */
+/* プレビュー：はみ出し完全防止 */
 .preview-box{ margin-top:22px; }
 .preview-title{ font-weight:900; margin-bottom:8px; }
 .preview-frame{
   width:100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio:16/9;
   border-radius:18px;
   border:2px solid #dbeafe;
   background:#f8fbff;
@@ -47,6 +47,7 @@ textarea{ min-height:120px; }
 .preview-inner{
   position:absolute; inset:0;
   display:flex; align-items:center; justify-content:center;
+  padding:10px;
 }
 .preview-inner img{
   max-width:100%;
@@ -57,6 +58,7 @@ textarea{ min-height:120px; }
   display:block;
 }
 
+/* エラー表示 */
 .err{
   margin-top:10px;
   padding:10px 12px;
@@ -67,13 +69,13 @@ textarea{ min-height:120px; }
   font-weight:900;
   font-size:13px;
 }
+.muted{ opacity:.7; font-size:13px; margin-top:6px; }
 </style>
 
 <div class="wrap">
   <div class="card">
-    <div class="h1">曲を投稿</div>
+    <div class="h1">投稿を編集</div>
 
-    {{-- バリデーション表示 --}}
     @if ($errors->any())
       <div class="err">
         @foreach ($errors->all() as $e)
@@ -82,11 +84,13 @@ textarea{ min-height:120px; }
       </div>
     @endif
 
-    <form id="songForm" method="POST" action="{{ route('songs.store') }}">
+    <form id="songEditForm" method="POST" action="{{ route('songs.update', $song->id) }}">
       @csrf
+      @method('PUT')
 
       <div class="label">URL</div>
-      <input class="input" type="text" name="url" id="urlInput" value="{{ old('url') }}" required>
+      <input class="input" type="text" name="url" id="urlInput"
+             value="{{ old('url', $song->url) }}" required>
 
       <div class="preview-box">
         <div class="preview-title">プレビュー</div>
@@ -103,10 +107,12 @@ textarea{ min-height:120px; }
       </div>
 
       <div class="label">曲名</div>
-      <input class="input" type="text" name="title" value="{{ old('title') }}" required>
+      <input class="input" type="text" name="title"
+             value="{{ old('title', $song->title) }}" required>
 
       <div class="label">アーティスト</div>
-      <input class="input" type="text" name="artist" value="{{ old('artist') }}" required>
+      <input class="input" type="text" name="artist"
+             value="{{ old('artist', $song->artist) }}" required>
 
       <div class="label">ジャンル（複数選択可）</div>
       <div class="genre-wrap">
@@ -116,66 +122,64 @@ textarea{ min-height:120px; }
           </button>
         @endforeach
       </div>
+      <div class="muted">※ジャンルは複数選択できます（例：ボカロ, Lo-Fi）</div>
 
-      {{-- ✅ これが送信されないとDBで落ちるので必須 --}}
-      <input type="hidden" name="genre" id="genreInput" value="{{ old('genre') }}">
+      {{-- hiddenに "A, B" を入れて送る（これが無いと更新されない） --}}
+      <input type="hidden" name="genre" id="genreInput" value="{{ old('genre', $song->genre) }}">
 
       <div class="label">コメント（任意）</div>
-      <textarea name="comment" maxlength="500">{{ old('comment') }}</textarea>
+      <textarea name="comment" maxlength="500">{{ old('comment', $song->comment) }}</textarea>
 
-      <button class="btn" type="submit">投稿する</button>
+      <button class="btn" type="submit">更新する</button>
     </form>
   </div>
 </div>
 
 <script>
-/* ジャンル複数選択 */
+/* ===== ジャンル複数選択（編集：初期値反映） ===== */
 const genreBtns  = document.querySelectorAll('.genre-btn');
 const genreInput = document.getElementById('genreInput');
-let selected = [];
 
-/* old('genre') がある場合、ボタン状態復元 */
+let selected = [];
 if (genreInput.value) {
   selected = genreInput.value.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function refreshButtons(){
   genreBtns.forEach(btn => {
-    if (selected.includes(btn.dataset.value)) btn.classList.add('active');
+    btn.classList.toggle('active', selected.includes(btn.dataset.value));
   });
 }
+refreshButtons();
 
 genreBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const v = btn.dataset.value;
-    if (selected.includes(v)) {
-      selected = selected.filter(x => x !== v);
-      btn.classList.remove('active');
-    } else {
-      selected.push(v);
-      btn.classList.add('active');
-    }
+    if (selected.includes(v)) selected = selected.filter(x => x !== v);
+    else selected.push(v);
+
     genreInput.value = selected.join(', ');
+    refreshButtons();
   });
 });
 
-/* 送信前チェック（未選択なら止める＝NULL防止） */
-document.getElementById('songForm').addEventListener('submit', (e) => {
+/* 未選択送信防止 */
+document.getElementById('songEditForm').addEventListener('submit', (e) => {
   if (!genreInput.value.trim()) {
     e.preventDefault();
     alert('ジャンルを1つ以上選択してください。');
   }
 });
 
-/* URL → YouTubeサムネ（未対応はデフォルト） */
+/* ===== URL → YouTubeサムネ ===== */
 const urlInput = document.getElementById('urlInput');
 const preview  = document.getElementById('previewImage');
 
 function setPreview(){
   const url = urlInput.value || '';
   const yt = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-  if (yt) {
-    preview.src = `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
-  } else {
-    preview.src = "{{ asset('images/default_thumb.png') }}";
-  }
+  if (yt) preview.src = `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
+  else preview.src = "{{ asset('images/default_thumb.png') }}";
 }
 urlInput.addEventListener('input', setPreview);
 setPreview();
