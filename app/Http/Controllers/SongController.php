@@ -2,55 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Song;
-
-use Illuminate\Support\Facades\Auth;
+use App\Models\Genre;
+use Illuminate\Http\Request;
 
 class SongController extends Controller
 {
-    public function create()
+    public function __construct()
     {
-        return view('songs.create');
+        $this->middleware('auth'); // ログイン必須
     }
 
+    // ✅ 投稿フォーム表示（genres を渡す）
+    public function create()
+    {
+        $genres = Genre::orderBy('name')->get();
+        return view('songs.create', compact('genres'));
+    }
+
+    // ✅ 投稿保存（複数ジャンル → name をカンマ保存）
     public function store(Request $request)
     {
         $request->validate([
-            'url' => 'required|url|max:500',
+            'url' => 'required|string|max:500',
             'title' => 'required|string|max:255',
             'artist' => 'required|string|max:255',
-            'genres' => 'required|array',
-            'comment' => 'required|string|max:1000',
+            'genre_ids' => 'nullable|array',
+            'genre_ids.*' => 'integer|exists:genres,id',
+            'comment' => 'nullable|string',
         ]);
 
-        $selectedGenres = $request->genres;
-        if (in_array('その他', $selectedGenres) && $request->filled('genre_other_text')) {
-            $selectedGenres = array_diff($selectedGenres, ['その他']);
-            $selectedGenres[] = $request->genre_other_text;
+        $genreNames = [];
+        if ($request->filled('genre_ids')) {
+            $genreNames = Genre::whereIn('id', $request->genre_ids)->pluck('name')->toArray();
         }
 
         Song::create([
-            'user_id' => Auth::id(),
-            'genre_id' => 1,
+            'user_id' => auth()->id(),
             'url' => $request->url,
             'title' => $request->title,
             'artist' => $request->artist,
-            'genre' => implode(', ', $selectedGenres),
-            'comment' => $request->comment,
+            'genre' => implode(',', $genreNames),
+            'comment' => $request->comment ?? '',
         ]);
 
-        return redirect()->route('songs.create')->with('success', '曲を投稿しました！');
+        return redirect()->route('home')->with('success', '投稿しました！');
     }
 }
-
-class AuthController extends Controller
-{
-    public function login(Request $request)
-    {
-        // ログイン処理
-        // 成功時はホームへリダイレクト
-        return redirect('/');
-    }
-}
-

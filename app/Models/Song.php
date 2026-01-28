@@ -3,29 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
 use Illuminate\Database\Eloquent\Model;
 
 class Song extends Model
 {
-
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'genre_id',
         'url',
         'title',
         'artist',
+        'genre',
         'comment',
-        'thumbnail',   // ← 追加
     ];
-
-
-    public function genre()
-    {
-        return $this->belongsTo(Genre::class);
-    }
 
     public function user()
     {
@@ -34,6 +25,11 @@ class Song extends Model
 
     public function votes()
     {
-        return $this->hasMany(Vote::class);
+        return $this->hasMany(\App\Models\Vote::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(\App\Models\Comment::class);
     }
 }

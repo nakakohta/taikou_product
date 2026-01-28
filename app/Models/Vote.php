@@ -9,19 +9,8 @@ class Vote extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'song_id',
-        'user_id',
-        'rating', // 1〜5
-    ];
+    protected $fillable = ['song_id', 'user_id', 'rating'];
 
-    public function song()
-    {
-        return $this->belongsTo(Song::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    public function song(){ return $this->belongsTo(Song::class); }
+    public function user(){ return $this->belongsTo(User::class); }
 }

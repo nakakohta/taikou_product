@@ -9,10 +9,5 @@ class Genre extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'sort_order'];
-
-    public function songs()
-    {
-        return $this->hasMany(Song::class);
-    }
+    protected $fillable = ['name'];
 }

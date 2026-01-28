@@ -1,102 +1,233 @@
-<!DOCTYPE html>
-<html lang="ja">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>ログイン - Laravel</title>
+@extends('layouts.app')
 
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+@section('content')
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            body {
-                font-family: 'Nunito', sans-serif;
-                background-color: #f3f4f6; /* 少し明るいグレー */
-            }
-            
-            /* Laravel公式の赤色: #FF2D20 */
-            
-            /* 入力フォームのスタイル */
-            .laravel-input {
-                border: 1px solid #d1d5db; /* 薄いグレー */
-                background-color: #ffffff;
-                color: #1f2937;
-                transition: all .2s;
-            }
-            .laravel-input:focus {
-                border-color: #FF2D20; /* フォーカス時にLaravelレッド */
-                box-shadow: 0 0 0 1px #FF2D20;
-                outline: none;
-            }
+<style>
+    .wrapper-login {
+        width: 100%;
+        max-width: 520px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 28px 30px 36px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        border: 2px solid #d4e9ff;
+        box-sizing: border-box;
+    }
 
-            /* ボタンのスタイル */
-            .laravel-button {
-                background-color: #FF2D20; /* Laravelレッド */
-                border: 1px solid #FF2D20;
-                color: #fff;
-                transition: background-color .2s ease-in-out;
-            }
-            .laravel-button:hover {
-                background-color: #e02418; /* ホバー時は少し濃い赤 */
-                border-color: #e02418;
-            }
-        </style>
-    </head>
-    <body class="antialiased text-gray-600">
-        
-        <div class="min-h-screen flex flex-col items-center justify-center pt-6 sm:pt-0 pb-20">
-            
-            <div class="mb-6">
-                <h1 class="text-4xl font-bold tracking-tight text-gray-800">
-                    <span class="text-[#FF2D20]">Laravel</span>
-                </h1>
-            </div>
+    .wrapper-login .cat-image {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
 
-            <div class="w-full max-w-[320px] p-6 bg-white shadow-md rounded-lg border-t-4 border-[#FF2D20]">
-                
-                <form method="POST" action="/login">
-                    @csrf
+    .wrapper-login .cat-image img {
+        width: 110px;
+        height: auto;
+        border-radius: 18px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        animation: fuwafuwa 3s ease-in-out infinite;
+    }
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold mb-2 text-gray-700" for="email">
-                            メールアドレス
-                        </label>
-                        <input class="laravel-input w-full p-2 rounded text-base" id="email" type="email" name="email" required autofocus>
-                    </div>
+    @keyframes fuwafuwa {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+        100% { transform: translateY(0); }
+    }
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold mb-2 text-gray-700" for="password">
-                            パスワード
-                        </label>
-                        <input class="laravel-input w-full p-2 rounded text-base" id="password" type="password" name="password" required>
-                    </div>
+    .wrapper-login h1 {
+        font-size: 20px;
+        text-align: center;
+        margin: 6px 0 10px;
+        color: #3b82f6;
+        font-weight: 700;
+    }
 
-                    <div class="flex items-center justify-between mt-6">
-                        <label class="flex items-center text-sm cursor-pointer hover:text-gray-900">
-                            <input type="checkbox" class="mr-2 rounded border-gray-300 text-[#FF2D20] focus:ring-[#FF2D20] focus:ring-opacity-50" name="remember">
-                            <span class="text-xs">ログイン状態を保存</span>
-                        </label>
+    .wrapper-login .subtitle {
+        font-size: 13px;
+        text-align: center;
+        color: #6b7280;
+        margin-bottom: 20px;
+        white-space: nowrap;
+        overflow: hidden;
+    }
 
-                        <button class="laravel-button font-bold py-2 px-6 rounded shadow-sm text-sm" type="submit">
-                            ログイン
-                        </button>
-                    </div>
-                </form>
-            </div>
+    .wrapper-login .field {
+        width: 100%;
+        margin-bottom: 18px;
+        box-sizing: border-box;
+    }
 
-            <div class="mt-6 text-center space-y-2">
-                <div>
-                    <a href="#" class="text-xs text-gray-500 hover:text-[#FF2D20] underline transition">
-                        パスワードをお忘れですか？
-                    </a>
-                </div>
-                <div>
-                    <a href="#" class="text-xs text-gray-500 hover:text-[#FF2D20] no-underline transition">
-                        ← サイトへ戻る
-                    </a>
-                </div>
-            </div>
+    .wrapper-login label {
+        font-size: 13px;
+        margin-bottom: 5px;
+        display: block;
+        color: #374151;
+        font-weight: 700;
+    }
+
+    .wrapper-login .required {
+        font-size: 11px;
+        color: #ef4444;
+        margin-left: 4px;
+        font-weight: 700;
+    }
+
+    .wrapper-login input[type="email"],
+    .wrapper-login input[type="password"] {
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 10px;
+        border: 2px solid #cfe5ff;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .wrapper-login input:focus {
+        border-color: #60a5fa;
+        background: #f0f8ff;
+        transform: translateY(-2px);
+        transition: 0.2s;
+        box-shadow: 0 3px 8px rgba(96,165,250,0.25);
+    }
+
+    .wrapper-login .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 4px;
+    }
+
+    .wrapper-login .remember {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #374151;
+        user-select: none;
+    }
+
+    .wrapper-login .remember input {
+        width: 16px;
+        height: 16px;
+        accent-color: #60a5fa;
+    }
+
+    .wrapper-login .button {
+        width: 100%;
+        padding: 12px 0;
+        margin-top: 14px;
+        background: #60a5fa;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(96,165,250,0.35);
+        transition: 0.15s;
+    }
+
+    .wrapper-login .button:hover {
+        background: #3b82f6;
+        transform: translateY(-1px);
+    }
+
+    .wrapper-login .bottom {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 13px;
+        color: #6b7280;
+        line-height: 1.9;
+    }
+
+    .wrapper-login .bottom a {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    .wrapper-login .errors {
+        background: #ffe5e5;
+        border: 2px solid #ffb5b5;
+        padding: 10px 12px;
+        border-radius: 12px;
+        color: #b91c1c;
+        font-size: 13px;
+        margin-bottom: 14px;
+    }
+
+    .wrapper-login .success {
+        background: #e7f7ff;
+        border: 2px solid #bfe8ff;
+        padding: 10px 12px;
+        border-radius: 12px;
+        color: #0369a1;
+        font-size: 13px;
+        margin-bottom: 14px;
+    }
+
+    @media (max-width: 420px) {
+        .wrapper-login { padding: 22px 18px 30px; border-radius: 18px; }
+        .wrapper-login .subtitle { white-space: normal; }
+    }
+</style>
+
+<div class="wrapper-login">
+
+    <div class="cat-image">
+        <img src="{{ asset('images/アイコン.png') }}" alt="アイコン">
+    </div>
+
+    <h1>ログイン</h1>
+    <p class="subtitle">音楽共有サイト「対抗」を楽しむためにログインします。</p>
+
+    @if(session('success'))
+        <div class="success">{{ session('success') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div class="errors">
+            <ul style="margin:0; padding-left: 18px;">
+                @foreach ($errors->all() as $error)
+                    <li>・{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-    </body>
-</html>
-{{--ログインページ--}}
+    @endif
+
+    <form method="POST" action="{{ route('login.post') }}">
+        @csrf
+
+        <div class="field">
+            <label>メールアドレス <span class="required">必須</span></label>
+            <input type="email" name="email" value="{{ old('email') }}" required autocomplete="email">
+        </div>
+
+        <div class="field">
+            <label>パスワード <span class="required">必須</span></label>
+            <input type="password" name="password" required autocomplete="current-password">
+        </div>
+
+        <div class="row">
+            <label class="remember">
+                <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                ログイン状態を保存
+            </label>
+        </div>
+
+        <button class="button" type="submit">ログインする</button>
+    </form>
+
+    <div class="bottom">
+        まだアカウントがありませんか？<br>
+        <a href="{{ route('register.show') }}">新規登録へ</a><br>
+        <a href="{{ route('home') }}">← トップへ戻る</a>
+    </div>
+
+</div>
+
+@endsection

@@ -1,182 +1,259 @@
-<!DOCTYPE html>
-<html lang="ja">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>ユーザープロフィール - サイト名未定</title>
+@extends('layouts.app')
 
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+@section('content')
+<style>
+/* ===============================
+   全体
+================================ */
+.profile-container{
+    max-width: 1100px;
+    margin: 32px auto;
+    padding: 0 16px;
+}
 
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            body {
-                font-family: 'Nunito', sans-serif;
-                background-color: #f9fafb;
-                color: #333;
-            }
-            .song-card {
-                background-color: white;
-                transition: transform 0.2s, box-shadow 0.2s;
-                cursor: pointer;
-            }
-            .song-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            }
-        </style>
-    </head>
-    <body class="antialiased">
+/* ✅ 上2項目を横並びにする枠 */
+.top-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    align-items: start;
+    margin-bottom: 28px;
+}
 
-        <header class="bg-white shadow-sm sticky top-0 z-50">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <div class="text-xl font-bold text-gray-800">
-                    <span class="text-[#FF2D20]">サイト名未定</span>
-                </div>
-                <nav>
-                    <a href="/" class="text-sm text-gray-500 hover:text-[#FF2D20]">ログアウト</a>
-                </nav>
+/* ===============================
+   カード共通
+================================ */
+.card{
+    background: var(--card, #fff);
+    border: 2px solid var(--border, #dbeafe);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+}
+
+/* ===============================
+   プロフィールカード
+================================ */
+.profile-card{
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+/* アイコン巨大化防止 */
+.profile-icon{
+    width: 92px;
+    height: 92px;
+    border-radius: 18px;
+    object-fit: cover;
+    border: 2px solid var(--border, #dbeafe);
+    background: #f1f5f9;
+    flex-shrink: 0;
+}
+
+.profile-info h1{
+    font-size: 22px;
+    font-weight: 900;
+    margin: 0 0 4px;
+}
+
+.profile-info p{
+    font-size: 14px;
+    opacity: .7;
+    margin: 0 0 10px;
+}
+
+.badge-login{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #e7f7ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    width: fit-content;
+}
+
+/* ===============================
+   アイコン更新
+================================ */
+.icon-box h2{
+    font-size: 18px;
+    font-weight: 900;
+    margin: 0 0 6px;
+}
+
+.icon-box p{
+    font-size: 13px;
+    opacity: .7;
+    margin: 0 0 14px;
+}
+
+/* ファイル選択：はみ出し完全防止 */
+.file-wrap{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 2px solid var(--border, #dbeafe);
+    background: var(--bg, #f5faff);
+    overflow: hidden;
+}
+
+.file-input{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+}
+
+.file-btn{
+    padding: 8px 14px;
+    border-radius: 14px;
+    background: #eaf3ff;
+    border: 2px solid var(--border, #dbeafe);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.file-name{
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    opacity: .75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.update-btn{
+    margin-top: 16px;
+    width: 100%;
+    padding: 14px 0;
+    border-radius: 999px;
+    border: none;
+    background: var(--text-blue, #3b82f6);
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+/* ===============================
+   下部3項目（横並び）
+================================ */
+.three-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.panel{
+    background: var(--card, #fff);
+    border: 2px solid var(--border, #dbeafe);
+    border-radius: 22px;
+    padding: 20px;
+    min-height: 180px;
+}
+
+.panel h3{
+    font-size: 17px;
+    font-weight: 900;
+    margin: 0 0 12px;
+}
+
+/* ===============================
+   レスポンシブ
+================================ */
+@media (max-width: 980px){
+    .top-grid{
+        grid-template-columns: 1fr; /* スマホでは縦 */
+    }
+    .three-grid{
+        grid-template-columns: 1fr; /* スマホでは縦 */
+    }
+    .profile-card{
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    .badge-login{
+        margin: 0 auto;
+    }
+}
+</style>
+
+<div class="profile-container">
+
+    {{-- ✅ 上段：2項目を横並び --}}
+    <div class="top-grid">
+
+        {{-- プロフィール --}}
+        <div class="card profile-card">
+            <img
+                src="{{ auth()->user()->icon
+                    ? asset('storage/'.auth()->user()->icon)
+                    : asset('images/default_icon.png') }}"
+                class="profile-icon"
+                alt="icon"
+            >
+            <div class="profile-info">
+                <h1>{{ Auth::user()->name }}</h1>
+                <p>{{ Auth::user()->email }}</p>
+                <span class="badge-login">ログイン中 ✅</span>
             </div>
-        </header>
+        </div>
 
-        <main class="max-w-3xl mx-auto px-4 py-10 sm:px-6">
+        {{-- アイコン変更 --}}
+        <div class="card icon-box">
+            <h2>プロフィールアイコンを変更</h2>
+            <p>画像を選択して「更新する」を押してください。</p>
 
-            <div class="flex flex-row items-center gap-6 mb-12">
-                <div class="flex-shrink-0">
-                    <div class="w-24 h-24 sm:w-32 sm:h-32 bg-gray-300 rounded-lg border-4 border-white shadow-md flex items-center justify-center text-gray-500">
-                        <span class="text-sm">No Image</span>
-                    </div>
-                </div>
-                
-                <div class="flex-grow">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">
-                        テスト 太郎
-                    </h1>
-                    <p class="text-gray-500 text-sm mb-3">@music_lover_01</p>
-                    <div class="text-sm text-gray-600 leading-relaxed mb-4">
-                        ロックとジャズが好きです。週末に曲を作って投稿しています。<br>
-                        コラボ募集中！
-                    </div>
-                    <button class="bg-[#FF2D20] text-white px-6 py-1.5 rounded-full text-sm font-bold shadow hover:bg-red-600 transition">
-                        フォローする
-                    </button>
-                </div>
-            </div>
+            <form action="{{ route('profile.icon') }}" method="POST" enctype="multipart/form-data">
+                @csrf
 
-            <section class="mb-12">
-                <div class="flex items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-800 border-l-4 border-[#FF2D20] pl-3">
-                        My ベストソング
-                    </h2>
-                </div>
+                <label class="file-wrap">
+                    <input type="file" name="icon" accept="image/*" required class="file-input" id="iconInput">
+                    <span class="file-btn">ファイルを選択</span>
+                    <span class="file-name" id="fileName">ファイルが選択されていません</span>
+                </label>
 
-                <div class="grid grid-cols-3 gap-4 sm:gap-6">
-                    <div class="song-card rounded-lg overflow-hidden shadow-sm border border-gray-100 group">
-                        <div class="aspect-[3/4] bg-gray-200 relative flex items-center justify-center">
-                            <span class="text-gray-400 text-xs">Artwork 1</span>
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 flex items-center justify-center transition">
-                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg opacity-80">
-                                    <span class="text-[#FF2D20] ml-1">▶</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-3 text-center">
-                            <h3 class="font-bold text-sm text-gray-800 truncate">深夜のHighway</h3>
-                            <p class="text-xs text-gray-500 mt-1">2025.11.20</p>
-                        </div>
-                    </div>
+                <button type="submit" class="update-btn">更新する</button>
+            </form>
+        </div>
 
-                    <div class="song-card rounded-lg overflow-hidden shadow-sm border border-gray-100 group">
-                        <div class="aspect-[3/4] bg-gray-800 relative flex items-center justify-center">
-                            <span class="text-gray-500 text-xs">Artwork 2</span>
-                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 flex items-center justify-center transition">
-                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg opacity-80">
-                                    <span class="text-[#FF2D20] ml-1">▶</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-3 text-center">
-                            <h3 class="font-bold text-sm text-gray-800 truncate">Blue Rain</h3>
-                            <p class="text-xs text-gray-500 mt-1">2025.10.05</p>
-                        </div>
-                    </div>
+    </div>
 
-                    <div class="song-card rounded-lg overflow-hidden shadow-sm border border-gray-100 group">
-                        <div class="aspect-[3/4] bg-gray-200 relative flex items-center justify-center">
-                            <span class="text-gray-400 text-xs">Artwork 3</span>
-                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 flex items-center justify-center transition">
-                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg opacity-80">
-                                    <span class="text-[#FF2D20] ml-1">▶</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-3 text-center">
-                            <h3 class="font-bold text-sm text-gray-800 truncate">朝焼けのコーヒー</h3>
-                            <p class="text-xs text-gray-500 mt-1">2025.08.12</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    {{-- ✅ 下段：3項目（横並び） --}}
+    <div class="three-grid">
+        <div class="panel">
+            <h3>My ベストソング</h3>
+            <p>まだ投稿がありません。</p>
+        </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 h-full">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
-                        好きなジャンル
-                    </h3>
-                    <div class="flex flex-wrap gap-2 content-start">
-                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">J-POP</span>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Alternative Rock</span>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Lo-Fi HipHop</span>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">Jazz</span>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">R&B</span>
-                    </div>
-                </div>
+        <div class="panel">
+            <h3>好きなジャンル</h3>
+            <p>（ジャンルがまだありません）</p>
+        </div>
 
-                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 h-full">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
-                        好きな曲の集計
-                    </h3>
-                    <div class="space-y-5">
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-bold text-gray-700">1. Pretender</span>
-                                <span class="text-xs text-gray-500">124回</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-[#FF2D20] h-2 rounded-full" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-bold text-gray-700">2. 怪獣の花唄</span>
-                                <span class="text-xs text-gray-500">98回</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-[#FF2D20] h-2 rounded-full opacity-80" style="width: 70%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-bold text-gray-700">3. アイドル</span>
-                                <span class="text-xs text-gray-500">85回</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-[#FF2D20] h-2 rounded-full opacity-60" style="width: 60%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-bold text-gray-700">4. Marigold</span>
-                                <span class="text-xs text-gray-500">54回</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2">
-                                <div class="bg-[#FF2D20] h-2 rounded-full opacity-40" style="width: 40%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="panel">
+            <h3>好きな曲の集計</h3>
+            <p>（集計データがありません）</p>
+        </div>
+    </div>
 
-        </main>
-    </body>
-</html>
+</div>
+
+<script>
+document.getElementById('iconInput').addEventListener('change', function(){
+    document.getElementById('fileName').textContent =
+        this.files[0]?.name ?? 'ファイルが選択されていません';
+});
+</script>
+@endsection
