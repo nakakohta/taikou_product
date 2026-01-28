@@ -2,43 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Song;
-use App\Models\Comment;
 use App\Models\Vote;
+use App\Models\Comment;
+use App\Models\Favorite;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MusicController extends Controller
 {
-    // 曲詳細ページ
+    // 曲ページ表示
     public function show($id)
     {
-        $song = Song::with('user')->findOrFail($id);
+        $song = Song::with(['user'])->findOrFail($id);
 
-        // コメント一覧（新しい順）
         $comments = Comment::with('user')
             ->where('song_id', $song->id)
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
-        // 平均評価・件数
-        $avgRating = Vote::where('song_id', $song->id)->avg('rating');
-        $avgRating = $avgRating ? round($avgRating, 1) : null;
-        $ratingCount = Vote::where('song_id', $song->id)->count();
+        $avgRating = (int) round(
+            Vote::where('song_id', $song->id)->avg('rating') ?? 0
+        );
 
-        // 自分の評価
         $myRating = null;
-        if (auth()->check()) {
+        if (Auth::check()) {
             $myRating = Vote::where('song_id', $song->id)
-                ->where('user_id', auth()->id())
+                ->where('user_id', Auth::id())
                 ->value('rating');
         }
+
+        $isFavorited = false;
+        if (Auth::check()) {
+            $isFavorited = Favorite::where('song_id', $song->id)
+                ->where('user_id', Auth::id())
+                ->exists();
+        }
+
+        $thumbnailUrl = $this->makeThumbnailUrl($song);
 
         return view('music.show', compact(
             'song',
             'comments',
             'avgRating',
-            'ratingCount',
-            'myRating'
+            'myRating',
+            'isFavorited',
+            'thumbnailUrl'
         ));
     }
 
@@ -49,37 +58,71 @@ class MusicController extends Controller
             'comment' => 'required|string|max:500',
         ]);
 
-        $song = Song::findOrFail($id);
-
         Comment::create([
-            'song_id' => $song->id,
-            'user_id' => auth()->id(),
+            'song_id' => $id,
+            'user_id' => Auth::id(),
             'comment' => $request->comment,
         ]);
 
-        return redirect()->route('music.show', $song->id)->with('success', 'コメントしました！');
+        return back();
     }
 
-    // ★評価（投票）
+    // ★評価
     public function storeVote(Request $request, $id)
     {
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
         ]);
 
-        $song = Song::findOrFail($id);
-
-        // 既に評価していたら更新、なければ作成
         Vote::updateOrCreate(
-            [
-                'song_id' => $song->id,
-                'user_id' => auth()->id(),
-            ],
-            [
-                'rating' => $request->rating,
-            ]
+            ['song_id' => $id, 'user_id' => Auth::id()],
+            ['rating' => $request->rating]
         );
 
-        return redirect()->route('music.show', $song->id)->with('success', '評価を保存しました！');
+        return back();
+    }
+
+    // お気に入り ON/OFF（トグル）
+    public function toggleFavorite($id)
+    {
+        $exists = Favorite::where('song_id', $id)
+            ->where('user_id', Auth::id())
+            ->exists();
+
+        if ($exists) {
+            Favorite::where('song_id', $id)
+                ->where('user_id', Auth::id())
+                ->delete();
+        } else {
+            Favorite::create([
+                'song_id' => $id,
+                'user_id' => Auth::id(),
+            ]);
+        }
+
+        return back();
+    }
+
+    private function makeThumbnailUrl(Song $song): ?string
+    {
+        if (!empty($song->thumbnail)) {
+            return asset('storage/' . $song->thumbnail);
+        }
+
+        $url = $song->url ?? '';
+        $videoId = $this->extractYouTubeId($url);
+        if ($videoId) {
+            return "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg";
+        }
+
+        return null;
+    }
+
+    private function extractYouTubeId(string $url): ?string
+    {
+        if (preg_match('~youtu\.be/([a-zA-Z0-9_-]{6,})~', $url, $m)) return $m[1];
+        if (preg_match('~v=([a-zA-Z0-9_-]{6,})~', $url, $m)) return $m[1];
+        if (preg_match('~/embed/([a-zA-Z0-9_-]{6,})~', $url, $m)) return $m[1];
+        return null;
     }
 }

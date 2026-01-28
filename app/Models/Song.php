@@ -16,6 +16,7 @@ class Song extends Model
         'artist',
         'genre',
         'comment',
+        'thumbnail', // 使ってないなら消してOK（あっても問題なし）
     ];
 
     public function user()
@@ -25,11 +26,23 @@ class Song extends Model
 
     public function votes()
     {
-        return $this->hasMany(\App\Models\Vote::class);
+        return $this->hasMany(Vote::class);
     }
 
     public function comments()
     {
-        return $this->hasMany(\App\Models\Comment::class);
+        return $this->hasMany(Comment::class);
+    }
+
+    // ✅ favoritesテーブル（1対多）
+    public function favorites()
+    {
+        return $this->hasMany(\App\Models\Favorite::class, 'song_id');
+    }
+
+    // ✅ お気に入りしたユーザー（便利：必要なら）
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'favorites')->withTimestamps();
     }
 }

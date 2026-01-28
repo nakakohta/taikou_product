@@ -13,6 +13,8 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->tinyInteger('rating'); // 1〜5
             $table->timestamps();
+
+            $table->unique(['song_id', 'user_id']); // ✅ 1曲に1回だけ評価
         });
     }
 

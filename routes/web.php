@@ -9,7 +9,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\MusicController;
 
-// トップ
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // 認証
@@ -20,23 +19,30 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/register', fn () => view('register'))->name('register.show');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-// 曲ページ（閲覧）
+// 曲ページ（閲覧はOK）
 Route::get('/music/{id}', [MusicController::class, 'show'])->name('music.show');
 
 // ✅ ログイン必須
 Route::middleware('auth')->group(function () {
 
-    // プロフィール
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::post('/profile/icon', [ProfileController::class, 'updateIcon'])->name('profile.icon');
 
-    // 曲投稿
+    // 投稿
     Route::get('/songs/create', [SongController::class, 'create'])->name('songs.create');
     Route::post('/songs', [SongController::class, 'store'])->name('songs.store');
 
-    // コメント投稿
+    // ✅ 編集・削除（REST形に統一）
+    Route::get('/songs/{id}/edit', [SongController::class, 'edit'])->name('songs.edit');
+    Route::put('/songs/{id}', [SongController::class, 'update'])->name('songs.update');
+    Route::delete('/songs/{id}', [SongController::class, 'destroy'])->name('songs.destroy');
+
+    // コメント
     Route::post('/music/{id}/comment', [MusicController::class, 'storeComment'])->name('comment.store');
 
-    // ★評価（votes） ← これが無いせいで vote.store が未定義になっていました
+    // ★評価
     Route::post('/music/{id}/vote', [MusicController::class, 'storeVote'])->name('vote.store');
+
+    // お気に入り（トグル）
+    Route::post('/music/{id}/favorite', [MusicController::class, 'toggleFavorite'])->name('favorite.toggle');
 });

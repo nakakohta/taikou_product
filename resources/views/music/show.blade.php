@@ -2,207 +2,257 @@
 
 @section('content')
 <style>
-*, *::before, *::after { box-sizing:border-box; }
-
-.wrap{ max-width: 920px; margin: 28px auto; padding: 0 16px; }
+*, *::before, *::after { box-sizing: border-box; }
+.wrap{ max-width: 980px; margin: 28px auto; padding: 0 16px; }
 .card{
-  background:#fff;
-  border:2px solid #cfe5ff;
+  background: var(--card);
+  border:2px solid var(--border);
   border-radius:22px;
-  padding:18px;
-  box-shadow:0 12px 30px rgba(0,0,0,.06);
-  margin-bottom:16px;
+  padding:24px;
+  box-shadow:0 12px 30px var(--shadow);
 }
-.h1{ font-size:22px; font-weight:900; color:#2563eb; margin:0 0 6px; }
-.muted{ color:#64748b; font-size:13px; }
+.h1{ font-size:24px; font-weight:900; color: var(--text-blue); margin:0 0 10px; }
+.muted{ color: var(--muted); font-size:13px; }
 
-.row{ display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+.top{
+  display:grid;
+  grid-template-columns: 220px 1fr;
+  gap:16px;
+  align-items:start;
+}
+@media (max-width: 720px){ .top{ grid-template-columns: 1fr; } }
+
 .thumb{
-  width:220px; max-width:100%;
-  aspect-ratio: 16/9;
-  border-radius:16px;
+  width:220px; height:220px;
+  border-radius:18px;
+  border:2px solid var(--border);
   overflow:hidden;
-  border:2px solid #cfe5ff;
-  background:#f5faff;
+  background: var(--bg);
 }
-.thumb iframe{ width:100%; height:100%; border:0; display:block; }
-.meta{ flex: 1; min-width: 240px; }
+.thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+.meta{
+  border:2px solid var(--border);
+  border-radius:18px;
+  padding:14px 16px;
+  background: var(--bg);
+}
+.meta .row{ margin:6px 0; font-size:14px; color: var(--text); }
 .badge{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:8px 12px; border-radius:999px;
-  border:2px solid #cfe5ff; background:#f5faff;
-  font-weight:900; font-size:13px; color:#0f172a;
-}
-
-.section-title{ font-weight:900; color:#2563eb; margin:0 0 10px; }
-
-.rating-wrap{ display:flex; gap:10px; flex-wrap:wrap; }
-.rating-wrap input[type="radio"]{ position:absolute; opacity:0; pointer-events:none; }
-.rate-btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  min-width:72px; padding:10px 14px;
+  display:inline-block;
+  margin-top:10px;
+  padding:8px 12px;
   border-radius:999px;
-  border:2px solid #cfe5ff;
-  background:#f5faff;
+  border:2px solid var(--border);
+  background: var(--card);
   font-weight:900;
-  cursor:pointer;
-  user-select:none;
+  color: var(--text);
 }
-.rating-wrap input[type="radio"]:checked + .rate-btn{
-  border-color:#2563eb;
-  background:rgba(37,99,235,.12);
-  color:#2563eb;
+.link{
+  display:inline-block;
+  margin-top:10px;
+  font-weight:900;
+  color: var(--text-blue);
+  text-decoration:none;
+}
+.link:hover{ text-decoration:underline; }
+
+.hr{ margin:18px 0; border-top:2px dashed var(--border); }
+
+.grid3{
+  margin-top: 12px;
+  display:flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.input, .textarea{
-  width:100%; max-width:100%;
-  padding:12px 14px;
-  border-radius:14px;
-  border:2px solid #cfe5ff;
-  background:#f5faff;
-  font-size:14px;
+.box{
+  border:2px solid var(--border);
+  border-radius:18px;
+  padding:16px;
+  background: var(--card);
 }
-.textarea{ min-height:110px; resize:vertical; }
+.box-title{ font-size:16px; font-weight:900; color: var(--text-blue); margin:0 0 10px; }
+.box p{ margin:0; line-height:1.7; font-size:14px; color: var(--text); }
 
 .btn{
   width:100%;
   margin-top:10px;
-  padding:12px 0;
+  padding:14px 0;
   border:none;
   border-radius:999px;
   font-weight:900;
+  font-size:15px;
   color:#fff;
-  background:#2563eb;
+  background: var(--text-blue);
   cursor:pointer;
 }
 .btn:hover{ opacity:.95; }
 
-.success{
-  background:#e7f7ff; border:2px solid #bfe8ff; color:#0369a1;
-  border-radius:14px; padding:10px; font-size:13px; margin-bottom:14px;
+textarea{
+  width:100%;
+  max-width:100%;
+  min-height: 110px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:2px solid var(--border);
+  background: var(--bg);
+  font-size:14px;
+  color: var(--text);
 }
-.errors{
-  background:#ffe5e5; border:2px solid #ffb5b5; color:#b91c1c;
-  border-radius:14px; padding:10px; font-size:13px; margin-top:10px;
+
+.star-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.star-btn{
+  border:2px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
 }
+.star-btn:hover{ border-color: var(--text-blue); }
+
 .comment-item{
-  border:2px solid #cfe5ff;
-  background:#f5faff;
+  border:2px solid var(--border);
+  background: var(--bg);
   border-radius:16px;
   padding:12px;
   margin-top:10px;
 }
-.small{ font-size:12px; color:#64748b; }
+.comment-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.comment-user{ display:flex; align-items:center; gap:10px; font-weight:900; color: var(--text); }
+.comment-user img{
+  width:34px; height:34px; border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--border);
+  background: var(--card);
+}
+.comment-time{ color: var(--muted); font-size:12px; }
 </style>
 
+@php
+  $fallback = asset('images/アイコン.png');
+@endphp
+
 <div class="wrap">
-
-  @if(session('success'))
-    <div class="success">{{ session('success') }}</div>
-  @endif
-
-  {{-- 曲情報 --}}
   <div class="card">
-    <div class="row">
-      <div class="thumb">
-        {{-- YouTube/SoundCloud埋め込み（URLそのままだとダメなので簡易対応：YouTubeのみ） --}}
-        @php
-          $url = $song->url ?? '';
-          $embed = null;
-          if (preg_match('/[?&]v=([^&]+)/', $url, $m)) $embed = 'https://www.youtube.com/embed/'.$m[1];
-          if (preg_match('/youtu\.be\/([^?&]+)/', $url, $m)) $embed = 'https://www.youtube.com/embed/'.$m[1];
-          if (preg_match('/youtube\.com\/shorts\/([^?&]+)/', $url, $m)) $embed = 'https://www.youtube.com/embed/'.$m[1];
-        @endphp
 
-        @if($embed)
-          <iframe src="{{ $embed }}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        @else
-          <div style="padding:12px" class="muted">
-            プレビュー非対応URLです。<br>
-            <a href="{{ $song->url }}" target="_blank" rel="noopener" style="color:#2563eb;font-weight:900;">リンクを開く</a>
-          </div>
-        @endif
+    <h1 class="h1">{{ $song->title }}</h1>
+
+    <div class="top">
+      <div class="thumb">
+        <img
+          src="{{ $thumbnailUrl ?? $fallback }}"
+          alt="thumbnail"
+          onerror="this.onerror=null;this.src='{{ $fallback }}';"
+        >
       </div>
 
       <div class="meta">
-        <div class="h1">{{ $song->title }}</div>
-        <div class="muted">Artist：{{ $song->artist }}</div>
-        <div class="muted">Genre：{{ $song->genre }}</div>
-        <div style="margin-top:10px;">
-          <span class="badge">投稿者：{{ $song->user->name ?? 'unknown' }}</span>
-        </div>
+        <div class="row">アーティスト：<b>{{ $song->artist }}</b></div>
+        <div class="row">投稿者：<b>{{ $song->user->name ?? 'unknown' }}</b></div>
+        <div class="row">平均評価：<b>{{ $avgRating ?? 0 }} / 5</b></div>
+
+        @if(!empty($song->genre))
+          <div class="badge">{{ $song->genre }}</div>
+        @endif
+
+        <a class="link" href="{{ $song->url }}" target="_blank" rel="noopener">▶ URL を開く</a>
       </div>
     </div>
-  </div>
 
-  {{-- ★評価 --}}
-  <div class="card">
-    <h3 class="section-title">★評価</h3>
+    <div class="hr"></div>
 
-    <div class="muted" style="margin-bottom:12px;">
-      平均：<b>{{ $avgRating ?? '---' }}</b>（{{ $ratingCount ?? 0 }}件）
-      @auth / あなた：<b>{{ $myRating ?? '未評価' }}</b> @endauth
-    </div>
+    <div class="grid3">
 
-    @guest
-      <div class="muted">評価するにはログインが必要です。</div>
-    @else
-      <form id="voteForm" action="{{ route('vote.store', $song->id) }}" method="POST">
-        @csrf
+      <div class="box">
+        <div class="box-title">投稿コメント</div>
+        <p>{{ $song->comment ?: '（投稿コメントはありません）' }}</p>
+      </div>
 
-        <div class="rating-wrap">
-          @for($i=1; $i<=5; $i++)
-            <input
-              type="radio"
-              id="rate{{ $i }}"
-              name="rating"
-              value="{{ $i }}"
-              {{ (int)old('rating', $myRating ?? 0) === $i ? 'checked' : '' }}
-              onchange="document.getElementById('voteForm').submit();"
-            >
-            <label for="rate{{ $i }}" class="rate-btn">{{ $i }}★</label>
-          @endfor
+      <div class="box">
+        <div class="box-title">お気に入り</div>
+
+        @auth
+          <form method="POST" action="{{ route('favorite.toggle', $song->id) }}">
+            @csrf
+            <button class="btn" type="submit">
+              {{ !empty($isFavorited) ? '★ お気に入り解除' : '☆ お気に入り登録' }}
+            </button>
+          </form>
+          <div class="muted" style="margin-top:8px;">
+            {{ !empty($isFavorited) ? 'この曲はお気に入り済みです。' : 'あとで聴きたい曲を保存できます。' }}
+          </div>
+        @else
+          <div class="muted">お気に入り登録するにはログインしてください。</div>
+        @endauth
+      </div>
+
+      <div class="box">
+        <div class="box-title">★評価</div>
+
+        <div style="font-weight:900;font-size:18px; color: var(--text);">
+          平均：{{ $avgRating ?? 0 }} / 5
+          <span class="muted" style="margin-left:10px;">あなたの評価：{{ $myRating ?? '-' }}</span>
         </div>
 
-        <button type="submit" class="btn">評価を送信</button>
-      </form>
+        @auth
+          <form method="POST" action="{{ route('vote.store', $song->id) }}">
+            @csrf
+            <div class="star-row">
+              @for($i=1;$i<=5;$i++)
+                <button class="star-btn" type="submit" name="rating" value="{{ $i }}">
+                  {{ $i }} ★
+                </button>
+              @endfor
+            </div>
+            <div class="muted" style="margin-top:8px;">※同じ曲は上書き保存になります</div>
+          </form>
+        @else
+          <div class="muted" style="margin-top:10px;">評価するにはログインしてください。</div>
+        @endauth
+      </div>
 
-      @error('rating')
-        <div class="errors">{{ $message }}</div>
-      @enderror
-    @endguest
-  </div>
+      <div class="box">
+        <div class="box-title">コメント</div>
 
-  {{-- コメント --}}
-  <div class="card">
-    <h3 class="section-title">コメント</h3>
+        @auth
+          <form method="POST" action="{{ route('comment.store', $song->id) }}">
+            @csrf
+            <textarea name="comment" maxlength="500" placeholder="コメントを入力（最大500文字）"></textarea>
+            <button class="btn" type="submit">コメントする</button>
+          </form>
+        @else
+          <div class="muted">コメントするにはログインしてください。</div>
+        @endauth
 
-    @auth
-      <form action="{{ route('comment.store', $song->id) }}" method="POST">
-        @csrf
-        <textarea name="comment" class="textarea" placeholder="コメントを入力...">{{ old('comment') }}</textarea>
-        <button type="submit" class="btn">コメントする</button>
-      </form>
+        @forelse($comments as $c)
+          <div class="comment-item">
+            <div class="comment-head">
+              <div class="comment-user">
+                <img
+                  src="{{ $c->user && $c->user->icon ? asset('storage/'.$c->user->icon) : asset('images/default_icon.png') }}"
+                  alt="icon"
+                  onerror="this.onerror=null;this.src='{{ asset('images/default_icon.png') }}';"
+                >
+                {{ $c->user->name ?? 'unknown' }}
+              </div>
+              <div class="comment-time">{{ $c->created_at }}</div>
+            </div>
 
-      @error('comment')
-        <div class="errors">{{ $message }}</div>
-      @enderror
-    @else
-      <div class="muted">コメントするにはログインが必要です。</div>
-    @endauth
+            <div style="margin-top:8px; font-size:14px; line-height:1.7; color: var(--text);">
+              {{ $c->comment }}
+            </div>
+          </div>
+        @empty
+          <div class="muted" style="margin-top:12px;">まだコメントがありません。</div>
+        @endforelse
 
-    <div style="margin-top:14px;">
-      @forelse($comments as $c)
-        <div class="comment-item">
-          <div style="font-weight:900;">{{ $c->user->name ?? 'unknown' }}</div>
-          <div style="margin-top:6px;">{{ $c->comment }}</div>
-          <div class="small" style="margin-top:6px;">{{ $c->created_at }}</div>
-        </div>
-      @empty
-        <div class="muted">まだコメントはありません。</div>
-      @endforelse
+      </div>
+
     </div>
-  </div>
 
+  </div>
 </div>
 @endsection

@@ -14,10 +14,7 @@
             --border:#d4e9ff;
             --text-blue:#3b82f6;
             --shadow: rgba(15, 23, 42, 0.08);
-            --soft:#eef6ff;
         }
-
-        *{ box-sizing:border-box; }
 
         body{
             margin:0;
@@ -44,7 +41,6 @@
             padding: 24px 20px 60px;
         }
 
-        /* ロゴ */
         .logo-area{
             display:flex;
             align-items:center;
@@ -66,10 +62,8 @@
             letter-spacing: 0.5px;
         }
 
-        /* 全画像の暴走防止（ロゴは固定済み） */
         img{ max-width: 100%; height: auto; }
 
-        /* 右側 */
         .user-area{
             display:flex;
             align-items:center;
@@ -104,25 +98,6 @@
             text-decoration:none;
         }
         nav a:hover{ text-decoration: underline; }
-
-        /* 共通フォーム */
-        input, textarea, select, button{ font-family: inherit; }
-        input, textarea, select{
-            color: var(--text);
-            background: var(--soft);
-            border: 2px solid var(--border);
-            outline: none;
-        }
-        input::placeholder, textarea::placeholder{ color: var(--muted); }
-
-        .muted{ color: var(--muted); }
-
-        .card{
-            background: var(--card);
-            border: 2px solid var(--border);
-            box-shadow: 0 12px 30px var(--shadow);
-            border-radius: 22px;
-        }
     </style>
 </head>
 
