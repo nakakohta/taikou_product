@@ -10,13 +10,7 @@ class Song extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'url',
-        'title',
-        'artist',
-        'genre',
-        'comment',
-        'thumbnail', // 使ってないなら消してOK（あっても問題なし）
+        'user_id','url','title','artist','genre','comment','thumbnail',
     ];
 
     public function user()
@@ -26,23 +20,16 @@ class Song extends Model
 
     public function votes()
     {
-        return $this->hasMany(Vote::class);
+        return $this->hasMany(\App\Models\Vote::class);
     }
 
     public function comments()
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(\App\Models\Comment::class);
     }
 
-    // ✅ favoritesテーブル（1対多）
     public function favorites()
     {
         return $this->hasMany(\App\Models\Favorite::class, 'song_id');
-    }
-
-    // ✅ お気に入りしたユーザー（便利：必要なら）
-    public function favoritedBy()
-    {
-        return $this->belongsToMany(\App\Models\User::class, 'favorites')->withTimestamps();
     }
 }

@@ -2,35 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use Notifiable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'icon',
-    ];
+    protected $appends = ['icon_url'];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    // ✅ お気に入り（Favoriteモデル）
-    public function favorites()
+    public function getIconUrlAttribute()
     {
-        return $this->hasMany(\App\Models\Favorite::class);
+        if (empty($this->icon)) {
+            return asset('images/default_icon.png');
+        }
+
+        $icon = ltrim($this->icon, '/');
+
+        // public配下 (uploads/icons/xxx.png)
+        if (str_starts_with($icon, 'uploads/')) {
+            return asset($icon);
+        }
+
+        // すでに storage/ で保存している場合
+        if (str_starts_with($icon, 'storage/')) {
+            return asset($icon);
+        }
+
+        // "icons/xxx.png" など古い保存形式 → storage に寄せる
+        return asset('storage/' . $icon);
     }
 }

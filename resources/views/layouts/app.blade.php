@@ -112,9 +112,10 @@
         @auth
             <a href="{{ route('profile') }}" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
                 <img
-                    src="{{ Auth::user()->icon ? asset('storage/'.Auth::user()->icon) : asset('images/default_icon.png') }}"
+                    src="{{ Auth::user()->icon_url }}"
                     class="user-icon"
                     alt="icon"
+                    onerror="this.onerror=null;this.src='{{ asset('images/default_icon.png') }}';"
                 >
                 <span class="user-name">{{ Auth::user()->name }}</span>
             </a>

@@ -12,14 +12,14 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // ✅ My ベストソング（最新3件）
+        // My ベストソング（最新3件）
         $bestSongs = Song::where('user_id', $user->id)
             ->latest()
             ->take(3)
             ->get();
 
-        // ✅ 好きなジャンル（自分の投稿曲のgenreを集計：カンマ区切り対応）
-        $genresCount = Song::where('user_id', $user->id)
+        // 好きなジャンル（songs.genre が "JPOP, ロック" 形式想定）
+        $genres = Song::where('user_id', $user->id)
             ->pluck('genre')
             ->filter()
             ->flatMap(function ($g) {
@@ -30,48 +30,66 @@ class ProfileController extends Controller
             ->countBy()
             ->sortDesc();
 
-        $favoriteGenres = $genresCount->keys()->take(8)->values();
+        $favoriteGenres = $genres->keys()->take(8)->values();
 
-        // ✅ 投稿した曲（編集・削除用の一覧）
-        $mySongs = Song::where('user_id', $user->id)
-            ->latest()
-            ->get();
-
-        // ✅ お気に入り数ランキング（自分の投稿曲が「何回」お気に入りされたか）
-        $rankingSongs = Song::where('user_id', $user->id)
-            ->withCount('favorites')
-            ->orderByDesc('favorites_count')
-            ->orderByDesc('id')
+        // ✅ 評価ランキング（平均評価：小数1桁）
+        $rankRaw = Song::where('user_id', $user->id)
+            ->withAvg('votes', 'rating')
+            ->orderByDesc('votes_avg_rating')
             ->take(5)
             ->get();
 
-        $max = (int) ($rankingSongs->max('favorites_count') ?? 0);
+        $maxRating = (float) ($rankRaw->max('votes_avg_rating') ?? 0);
 
-        $favoriteRanking = $rankingSongs->map(function ($song) use ($max) {
-            $count = (int) $song->favorites_count;
-            $pct = $max > 0 ? (int) round(($count / $max) * 90) : 0;
+        $ratingRanking = $rankRaw->map(function ($s) use ($maxRating) {
+            $avg = $s->votes_avg_rating ? round((float) $s->votes_avg_rating, 1) : 0.0;
+            $pct = $maxRating > 0 ? (int) round(($avg / $maxRating) * 90) : 0;
+
             return [
-                'label' => $song->title,
+                'label' => $s->title,
+                'count' => $avg,
+                'pct'   => $pct,
+            ];
+        });
+
+        // ✅ お気に入り数ランキング
+        $favRankRaw = Song::where('user_id', $user->id)
+            ->withCount('favorites')
+            ->orderByDesc('favorites_count')
+            ->take(5)
+            ->get();
+
+        $maxFav = (int) ($favRankRaw->max('favorites_count') ?? 0);
+
+        $favoriteRanking = $favRankRaw->map(function ($s) use ($maxFav) {
+            $count = (int) $s->favorites_count;
+            $pct = $maxFav > 0 ? (int) round(($count / $maxFav) * 90) : 0;
+
+            return [
+                'label' => $s->title,
                 'count' => $count,
                 'pct'   => $pct,
             ];
         });
 
-        // ✅ 追加：お気に入り一覧（自分がお気に入り登録した曲）
-        // favoritesテーブル経由で、song情報を取る
-        $favoriteSongs = $user->favorites()
-            ->with(['song.user'])           // Favorite -> Song -> User
+        // 投稿した曲（編集/削除用）
+        $mySongs = Song::where('user_id', $user->id)
             ->latest()
-            ->get()
-            ->map(function ($fav) {
-                return $fav->song;
+            ->get();
+
+        // ✅ お気に入り一覧（自分がお気に入りした曲）
+        $favoriteSongs = Song::whereHas('favorites', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
             })
-            ->filter(); // songが消えていた場合に備える
+            ->with('user')
+            ->latest()
+            ->get();
 
         return view('profile', compact(
             'user',
             'bestSongs',
             'favoriteGenres',
+            'ratingRanking',
             'favoriteRanking',
             'mySongs',
             'favoriteSongs'
@@ -84,10 +102,19 @@ class ProfileController extends Controller
             'icon' => 'required|image|max:4096',
         ]);
 
-        $path = $request->file('icon')->store('icons', 'public');
+        $file = $request->file('icon');
+
+        // ✅ 本番対策：保存先が無ければ作る
+        $dir = public_path('uploads/icons');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $name = uniqid('icon_', true) . '.' . $file->getClientOriginalExtension();
+        $file->move($dir, $name);
 
         $user = Auth::user();
-        $user->icon = $path;
+        $user->icon = 'uploads/icons/' . $name; // asset() で表示OK
         $user->save();
 
         return back()->with('success', 'アイコンを更新しました！');

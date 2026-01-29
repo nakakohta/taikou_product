@@ -67,6 +67,11 @@ textarea{ min-height:120px; }
   font-weight:900;
   font-size:13px;
 }
+.muted{
+  margin-top:6px;
+  color:#64748b;
+  font-size:12px;
+}
 </style>
 
 <div class="wrap">
@@ -87,6 +92,7 @@ textarea{ min-height:120px; }
 
       <div class="label">URL</div>
       <input class="input" type="text" name="url" id="urlInput" value="{{ old('url') }}" required>
+      <div class="muted">※ YouTube（youtube.com / youtu.be）のURLのみ投稿できます。</div>
 
       <div class="preview-box">
         <div class="preview-title">プレビュー</div>
@@ -109,7 +115,7 @@ textarea{ min-height:120px; }
       <input class="input" type="text" name="artist" value="{{ old('artist') }}" required>
 
       <div class="label">ジャンル（複数選択可）</div>
-      <div class="genre-wrap">
+      <div class="genre-wrap" id="genreWrap">
         @foreach($genres as $genre)
           <button type="button" class="genre-btn" data-value="{{ $genre->name }}">
             {{ $genre->name }}
@@ -117,7 +123,7 @@ textarea{ min-height:120px; }
         @endforeach
       </div>
 
-      {{-- ✅ これが送信されないとDBで落ちるので必須 --}}
+      {{-- ✅ これが送信される（複数なら "A, B"） --}}
       <input type="hidden" name="genre" id="genreInput" value="{{ old('genre') }}">
 
       <div class="label">コメント（任意）</div>
@@ -129,55 +135,123 @@ textarea{ min-height:120px; }
 </div>
 
 <script>
-/* ジャンル複数選択 */
-const genreBtns  = document.querySelectorAll('.genre-btn');
-const genreInput = document.getElementById('genreInput');
-let selected = [];
+(() => {
+  const form      = document.getElementById('songForm');
+  const urlInput  = document.getElementById('urlInput');
+  const preview   = document.getElementById('previewImage');
+  const genreBtns = document.querySelectorAll('.genre-btn');
+  const genreInput= document.getElementById('genreInput');
 
-/* old('genre') がある場合、ボタン状態復元 */
-if (genreInput.value) {
-  selected = genreInput.value.split(',').map(s => s.trim()).filter(Boolean);
-  genreBtns.forEach(btn => {
-    if (selected.includes(btn.dataset.value)) btn.classList.add('active');
-  });
-}
+  const defaultThumb = "{{ asset('images/default_thumb.png') }}";
 
-genreBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const v = btn.dataset.value;
-    if (selected.includes(v)) {
-      selected = selected.filter(x => x !== v);
-      btn.classList.remove('active');
-    } else {
-      selected.push(v);
-      btn.classList.add('active');
+  // ===== YouTube判定（ドメイン） =====
+  function isYoutubeUrl(raw){
+    try{
+      const u = new URL(raw.trim());
+      const host = u.hostname.replace(/^www\./,'').toLowerCase();
+      return (host === 'youtube.com' || host.endsWith('.youtube.com') || host === 'youtu.be');
+    }catch(e){
+      return false;
     }
-    genreInput.value = selected.join(', ');
+  }
+
+  // ===== YouTube ID 抽出（watch?v= / youtu.be/ / shorts/ / embed/）=====
+  function getYoutubeId(raw){
+    try{
+      const u = new URL(raw.trim());
+      const host = u.hostname.replace(/^www\./,'').toLowerCase();
+
+      // youtu.be/VIDEOID
+      if(host === 'youtu.be'){
+        const id = u.pathname.split('/').filter(Boolean)[0];
+        return id || null;
+      }
+
+      // youtube.com/watch?v=VIDEOID
+      const v = u.searchParams.get('v');
+      if(v) return v;
+
+      // youtube.com/shorts/VIDEOID
+      const p = u.pathname.split('/').filter(Boolean);
+      const idxShorts = p.indexOf('shorts');
+      if(idxShorts >= 0 && p[idxShorts+1]) return p[idxShorts+1];
+
+      // youtube.com/embed/VIDEOID
+      const idxEmbed = p.indexOf('embed');
+      if(idxEmbed >= 0 && p[idxEmbed+1]) return p[idxEmbed+1];
+
+      return null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  // ===== サムネ更新 =====
+  function setPreview(){
+    const url = urlInput.value.trim();
+    if(!url || !isYoutubeUrl(url)){
+      preview.src = defaultThumb;
+      return;
+    }
+    const id = getYoutubeId(url);
+    if(id){
+      preview.src = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    }else{
+      preview.src = defaultThumb;
+    }
+  }
+
+  urlInput.addEventListener('input', setPreview);
+  setPreview();
+
+  // ===== ジャンル複数選択（復元含む）=====
+  let selected = [];
+
+  if(genreInput.value){
+    selected = genreInput.value.split(',').map(s=>s.trim()).filter(Boolean);
+    genreBtns.forEach(btn=>{
+      if(selected.includes(btn.dataset.value)) btn.classList.add('active');
+    });
+  }
+
+  genreBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const v = btn.dataset.value;
+      if(selected.includes(v)){
+        selected = selected.filter(x=>x!==v);
+        btn.classList.remove('active');
+      }else{
+        selected.push(v);
+        btn.classList.add('active');
+      }
+      genreInput.value = selected.join(', ');
+    });
   });
-});
 
-/* 送信前チェック（未選択なら止める＝NULL防止） */
-document.getElementById('songForm').addEventListener('submit', (e) => {
-  if (!genreInput.value.trim()) {
-    e.preventDefault();
-    alert('ジャンルを1つ以上選択してください。');
-  }
-});
+  // ===== 送信前チェック（YouTubeのみ + ジャンル必須）=====
+  form.addEventListener('submit', (e)=>{
+    const url = urlInput.value.trim();
 
-/* URL → YouTubeサムネ（未対応はデフォルト） */
-const urlInput = document.getElementById('urlInput');
-const preview  = document.getElementById('previewImage');
+    if(!url || !isYoutubeUrl(url)){
+      e.preventDefault();
+      alert('YouTube（youtube.com / youtu.be）のURLのみ投稿できます。');
+      return;
+    }
 
-function setPreview(){
-  const url = urlInput.value || '';
-  const yt = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-  if (yt) {
-    preview.src = `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
-  } else {
-    preview.src = "{{ asset('images/default_thumb.png') }}";
-  }
-}
-urlInput.addEventListener('input', setPreview);
-setPreview();
+    // IDが取れないURLは弾く（YouTube内でも変なURL対策）
+    const id = getYoutubeId(url);
+    if(!id){
+      e.preventDefault();
+      alert('YouTube動画IDを含むURLを入力してください。');
+      return;
+    }
+
+    if(!genreInput.value.trim()){
+      e.preventDefault();
+      alert('ジャンルを1つ以上選択してください。');
+      return;
+    }
+  });
+})();
 </script>
 @endsection
