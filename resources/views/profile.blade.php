@@ -2,14 +2,40 @@
 
 @section('content')
 <style>
-/* ======（あなたのCSSそのまま + スマホ強化）====== */
+/* ======（あなたのCSSそのまま + 〇アイコン反映）====== */
 *, *::before, *::after { box-sizing: border-box; }
 
 .profile-container{ max-width: 1100px; margin: 32px auto; padding: 0 16px; }
 .top-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; margin-bottom:28px; }
 .card{ background: var(--card, #fff); border:2px solid var(--border, #dbeafe); border-radius:22px; padding:22px; box-shadow:0 8px 24px rgba(0,0,0,.06); }
 .profile-card{ display:flex; gap:18px; align-items:center; min-width:0; }
-.profile-icon{ width:92px; height:92px; border-radius:18px; object-fit:cover; border:2px solid var(--border, #dbeafe); background:#f1f5f9; flex-shrink:0; }
+
+/* ✅ 画像アイコン（〇に変更） */
+.profile-icon{
+  width:92px; height:92px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid var(--border, #dbeafe);
+  background:#f1f5f9;
+  flex-shrink:0;
+}
+
+/* ✅ 文字アイコン（〇に変更） */
+.profile-initial{
+  width:92px; height:92px;
+  border-radius:50%;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:34px;
+  color:#fff;
+  background: var(--text-blue, #3b82f6);
+  border:2px solid var(--border, #dbeafe);
+  flex-shrink:0;
+}
+.profile-initial.show{ display:flex; }
+
 .profile-info{ min-width:0; }
 .profile-info h1{ font-size:22px; font-weight:900; margin:0 0 4px; overflow-wrap:anywhere; }
 .profile-info p{ font-size:14px; opacity:.7; margin:0 0 10px; overflow-wrap:anywhere; }
@@ -85,10 +111,10 @@
   .profile-card{ flex-direction:column; text-align:center; align-items:center; }
   .badge-login{ margin:0 auto; }
 }
-
 @media (max-width:560px){
   .card, .panel, .my-songs, .fav-box{ padding:16px; border-radius:18px; }
-  .profile-icon{ width:84px; height:84px; }
+  .profile-icon, .profile-initial{ width:84px; height:84px; }
+  .profile-initial{ font-size:30px; }
   .song-row, .fav-row{ flex-direction:column; align-items:flex-start; }
   .actions, .fav-right{ width:100%; justify-content:flex-start; }
   .btn-mini{ width:auto; }
@@ -98,16 +124,25 @@
 <div class="profile-container">
 
   <div class="top-grid">
+
     <div class="card profile-card">
+      @php
+        $u = Auth::user();
+        $initial = mb_substr($u->name ?? 'U', 0, 1);
+      @endphp
+
+      {{-- ✅ 画像 → 失敗したら頭文字 --}}
       <img
-        src="{{ auth()->user()->icon_url }}"
+        src="{{ $u->icon_url }}"
         class="profile-icon"
         alt="icon"
-        onerror="this.onerror=null;this.src='{{ asset('images/default_icon.png') }}';"
+        onerror="this.style.display='none';this.nextElementSibling.classList.add('show');"
       >
+      <div class="profile-initial">{{ $initial }}</div>
+
       <div class="profile-info">
-        <h1>{{ Auth::user()->name }}</h1>
-        <p>{{ Auth::user()->email }}</p>
+        <h1>{{ $u->name }}</h1>
+        <p>{{ $u->email }}</p>
         <span class="badge-login">ログイン中 ✅</span>
       </div>
     </div>
@@ -127,6 +162,7 @@
         <button type="submit" class="update-btn">更新する</button>
       </form>
     </div>
+
   </div>
 
   <div class="three-grid">
@@ -160,14 +196,12 @@
 
     <div class="panel">
       <h3>お気に入り数ランキング</h3>
-
       @if(($favoriteRanking ?? collect())->count())
         @foreach($favoriteRanking as $row)
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;">
             <div style="font-weight:900;min-width:0;overflow-wrap:anywhere;">{{ $row['label'] }}</div>
             <div style="opacity:.7;font-weight:900;white-space:nowrap;">{{ $row['count'] }}回</div>
           </div>
-
           <div style="margin-top:8px;border:2px solid var(--border,#dbeafe);border-radius:999px;overflow:hidden;background:#fff;">
             <div style="height:10px;width:{{ $row['pct'] }}%;background:var(--text-blue,#3b82f6);"></div>
           </div>
@@ -203,6 +237,13 @@
     @empty
       <p>まだ投稿がありません。</p>
     @endforelse
+
+    {{-- ✅ 自作ページャー --}}
+    @if(method_exists($mySongs, 'links'))
+      <div style="margin-top:16px;">
+        {{ $mySongs->appends(request()->query())->links('vendor.pagination.taikou') }}
+      </div>
+    @endif
   </div>
 
   <div class="fav-box">
@@ -230,6 +271,13 @@
           </div>
         </div>
       @endforeach
+
+      {{-- ✅ 自作ページャー --}}
+      @if(method_exists($favoriteSongs, 'links'))
+        <div style="margin-top:16px;">
+          {{ $favoriteSongs->appends(request()->query())->links('vendor.pagination.taikou') }}
+        </div>
+      @endif
     @else
       <p>（お気に入りがまだありません）</p>
     @endif

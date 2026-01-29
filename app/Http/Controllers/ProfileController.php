@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\Song;
 
 class ProfileController extends Controller
 {
-    public function show()
+    public function show(Request $request)
     {
         $user = Auth::user();
 
@@ -52,7 +53,7 @@ class ProfileController extends Controller
             ];
         });
 
-        // ✅ お気に入り数ランキング
+        // ✅ お気に入り数ランキング（自分の投稿曲が「何回お気に入りされたか」）
         $favRankRaw = Song::where('user_id', $user->id)
             ->withCount('favorites')
             ->orderByDesc('favorites_count')
@@ -72,18 +73,21 @@ class ProfileController extends Controller
             ];
         });
 
-        // 投稿した曲（編集/削除用）
+        // ✅ 投稿した曲（編集/削除用）→ paginate（古い曲も見れる）
+        // 2つpaginateを同居させるため page name を分ける
         $mySongs = Song::where('user_id', $user->id)
             ->latest()
-            ->get();
+            ->paginate(10, ['*'], 'my')
+            ->withQueryString();
 
-        // ✅ お気に入り一覧（自分がお気に入りした曲）
+        // ✅ お気に入り一覧（自分がお気に入りした曲）→ paginate
         $favoriteSongs = Song::whereHas('favorites', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
             ->with('user')
             ->latest()
-            ->get();
+            ->paginate(10, ['*'], 'fav')
+            ->withQueryString();
 
         return view('profile', compact(
             'user',
@@ -99,24 +103,46 @@ class ProfileController extends Controller
     public function updateIcon(Request $request)
     {
         $request->validate([
-            'icon' => 'required|image|max:4096',
+            // 形式を絞る（安全側）
+            'icon' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
+        $user = Auth::user();
         $file = $request->file('icon');
 
-        // ✅ 本番対策：保存先が無ければ作る
+        // 保存先（public配下）
         $dir = public_path('uploads/icons');
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+
+        // ✅ 本番で「mkdir が禁止」「書き込み権限が無い」等でも 500 にしない
+        try {
+            if (!is_dir($dir)) {
+                // 失敗する可能性あり（権限/サーバ設定）
+                mkdir($dir, 0755, true);
+            }
+
+            if (!is_writable($dir)) {
+                // 書けないならアップロードを諦めて戻す（表示は icon_url の頭文字が効く）
+                return back()->withErrors([
+                    'icon' => '本番環境のサーバ設定上、画像アップロードが許可されていません（保存先の権限がありません）。',
+                ]);
+            }
+
+            // ファイル名は安全に
+            $ext  = strtolower($file->getClientOriginalExtension());
+            $name = 'icon_' . Str::uuid()->toString() . '.' . $ext;
+
+            $file->move($dir, $name);
+
+            // DBには public から見える相対パスを保存
+            $user->icon = 'uploads/icons/' . $name;
+            $user->save();
+
+            return back()->with('success', 'アイコンを更新しました！');
+        } catch (\Throwable $e) {
+            // ✅ 例外でも落とさない（本番でよく起きる）
+            return back()->withErrors([
+                'icon' => '本番環境の制限により画像を保存できませんでした。表示はデフォルト（頭文字アイコン）になります。',
+            ]);
         }
-
-        $name = uniqid('icon_', true) . '.' . $file->getClientOriginalExtension();
-        $file->move($dir, $name);
-
-        $user = Auth::user();
-        $user->icon = 'uploads/icons/' . $name; // asset() で表示OK
-        $user->save();
-
-        return back()->with('success', 'アイコンを更新しました！');
     }
 }
