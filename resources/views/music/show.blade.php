@@ -29,9 +29,6 @@
   overflow:hidden;
   background: var(--bg);
 }
-@media (max-width: 720px){
-  .thumb{ width:100%; height:auto; aspect-ratio: 1 / 1; }
-}
 .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
 
 .meta{
@@ -39,9 +36,8 @@
   border-radius:18px;
   padding:14px 16px;
   background: var(--bg);
-  min-width:0;
 }
-.meta .row{ margin:6px 0; font-size:14px; color: var(--text); overflow-wrap:anywhere; }
+.meta .row{ margin:6px 0; font-size:14px; color: var(--text); }
 .badge{
   display:inline-block;
   margin-top:10px;
@@ -77,7 +73,7 @@
   background: var(--card);
 }
 .box-title{ font-size:16px; font-weight:900; color: var(--text-blue); margin:0 0 10px; }
-.box p{ margin:0; line-height:1.7; font-size:14px; color: var(--text); overflow-wrap:anywhere; }
+.box p{ margin:0; line-height:1.7; font-size:14px; color: var(--text); }
 
 .btn{
   width:100%;
@@ -125,26 +121,39 @@ textarea{
   margin-top:10px;
 }
 .comment-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.comment-user{ display:flex; align-items:center; gap:10px; font-weight:900; color: var(--text); min-width:0; }
-.comment-user span{ overflow-wrap:anywhere; }
-.comment-user img{
-  width:34px; height:34px; border-radius:50%;
+.comment-user{ display:flex; align-items:center; gap:10px; font-weight:900; color: var(--text); }
+
+/* ✅ コメント用：画像＋1文字フォールバック（サイズは既存と同じ） */
+.cicon-img{
+  width:34px; height:34px;
+  border-radius:50%;
   object-fit:cover;
   border:2px solid var(--border);
   background: var(--card);
-  flex: 0 0 auto;
+  display:block;
 }
-.comment-time{ color: var(--muted); font-size:12px; white-space:nowrap; }
+.cicon-initial{
+  width:34px; height:34px;
+  border-radius:50%;
+  border:2px solid var(--border);
+  background: var(--text-blue);
+  color:#fff;
+  font-weight:900;
+  font-size:14px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
+.cicon-initial.show{ display:flex; }
+
+.comment-time{ color: var(--muted); font-size:12px; }
 </style>
 
 @php
   $fallback = asset('images/アイコン.png');
-
-  // ✅ 平均評価：小数1桁（/5 を消す）
   $avg = isset($avgRating) ? (float)$avgRating : 0.0;
   $avgText = number_format($avg, 1);
-
-  $defaultIcon = asset('images/default_icon.png');
 @endphp
 
 <div class="wrap">
@@ -240,20 +249,34 @@ textarea{
         @endauth
 
         @forelse($comments as $c)
+          @php
+            $cu = $c->user; // comment user
+            $cname = $cu->name ?? 'unknown';
+            $cinitial = mb_substr($cname, 0, 1);
+            $cicon = $cu?->icon_url; // null の可能性あり
+          @endphp
+
           <div class="comment-item">
             <div class="comment-head">
               <div class="comment-user">
-                <img
-                  src="{{ $c->user ? $c->user->icon_url : $defaultIcon }}"
-                  alt="icon"
-                  onerror="this.onerror=null;this.src='{{ $defaultIcon }}';"
-                >
-                <span>{{ $c->user->name ?? 'unknown' }}</span>
+                @if($cicon)
+                  <img
+                    src="{{ $cicon }}"
+                    class="cicon-img"
+                    alt="icon"
+                    onerror="this.style.display='none';this.nextElementSibling.classList.add('show');"
+                  >
+                  <span class="cicon-initial">{{ $cinitial }}</span>
+                @else
+                  <span class="cicon-initial show">{{ $cinitial }}</span>
+                @endif
+
+                {{ $cname }}
               </div>
               <div class="comment-time">{{ $c->created_at }}</div>
             </div>
 
-            <div style="margin-top:8px; font-size:14px; line-height:1.7; color: var(--text); overflow-wrap:anywhere;">
+            <div style="margin-top:8px; font-size:14px; line-height:1.7; color: var(--text);">
               {{ $c->comment }}
             </div>
           </div>

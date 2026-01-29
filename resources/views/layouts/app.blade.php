@@ -46,6 +46,7 @@
             align-items:center;
             gap:12px;
             text-decoration:none;
+            min-width: 0;
         }
         .logo-img{
             width: 52px;
@@ -60,6 +61,7 @@
             font-weight: 800;
             color: var(--text-blue);
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         img{ max-width: 100%; height: auto; }
@@ -68,21 +70,56 @@
             display:flex;
             align-items:center;
             gap:10px;
+            min-width: 0;
         }
-        .user-icon{
+
+        /* ✅ ヘッダーのアイコン枠（画像 or 文字） */
+        .user-icon-wrap{
             width:34px;
             height:34px;
             border-radius:50%;
-            object-fit:cover;
             border:2px solid var(--border);
-            flex: 0 0 auto;
             background: var(--bg);
+            flex: 0 0 auto;
+            overflow:hidden;
+            position: relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
         }
+
+        .user-icon{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+        }
+
+        /* ✅ 画像が無い/読めない時の「ユーザー名1文字」 */
+        .user-initial{
+            width:100%;
+            height:100%;
+            display:none; /* 通常は非表示 */
+            align-items:center;
+            justify-content:center;
+            font-weight:900;
+            font-size:14px;
+            color:#fff;
+            background: var(--text-blue);
+            letter-spacing: 0.5px;
+        }
+        .user-initial.show{ display:flex; }
+
         .user-name{
             font-size:14px;
             font-weight:800;
             color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
         }
+
         .logout-btn{
             border:none;
             background:transparent;
@@ -90,6 +127,7 @@
             color: var(--text-blue);
             font-weight:800;
             margin-left: 6px;
+            white-space: nowrap;
         }
 
         nav a{
@@ -98,6 +136,12 @@
             text-decoration:none;
         }
         nav a:hover{ text-decoration: underline; }
+
+        /* ✅ スマホ最適化：ヘッダーが詰まるのを防ぐ */
+        @media (max-width: 520px){
+            .logo-text{ font-size: 20px; }
+            .user-name{ display:none; } /* 小画面では名前を隠して崩れ防止 */
+        }
     </style>
 </head>
 
@@ -110,14 +154,25 @@
 
     <nav class="user-area">
         @auth
-            <a href="{{ route('profile') }}" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-                <img
-                    src="{{ Auth::user()->icon_url }}"
-                    class="user-icon"
-                    alt="icon"
-                    onerror="this.onerror=null;this.src='{{ asset('images/default_icon.png') }}';"
-                >
-                <span class="user-name">{{ Auth::user()->name }}</span>
+            @php
+                $u = Auth::user();
+                $initial = mb_substr($u->name ?? 'U', 0, 1);
+            @endphp
+
+            <a href="{{ route('profile') }}"
+               style="display:flex;align-items:center;gap:10px;text-decoration:none;min-width:0;">
+                <span class="user-icon-wrap">
+                    {{-- ✅ 常に icon_url を使う（外部URLでもローカルでもOK） --}}
+                    <img
+                        src="{{ $u->icon_url }}"
+                        class="user-icon"
+                        alt="icon"
+                        onerror="this.style.display='none'; this.nextElementSibling.classList.add('show');"
+                    >
+                    <span class="user-initial">{{ $initial }}</span>
+                </span>
+
+                <span class="user-name">{{ $u->name }}</span>
             </a>
 
             <form action="{{ route('logout') }}" method="POST" style="display:inline;">
