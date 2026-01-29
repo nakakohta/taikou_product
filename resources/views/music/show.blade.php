@@ -29,6 +29,9 @@
   overflow:hidden;
   background: var(--bg);
 }
+@media (max-width: 720px){
+  .thumb{ width:100%; height:auto; aspect-ratio: 1 / 1; }
+}
 .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
 
 .meta{
@@ -36,8 +39,9 @@
   border-radius:18px;
   padding:14px 16px;
   background: var(--bg);
+  min-width:0;
 }
-.meta .row{ margin:6px 0; font-size:14px; color: var(--text); }
+.meta .row{ margin:6px 0; font-size:14px; color: var(--text); overflow-wrap:anywhere; }
 .badge{
   display:inline-block;
   margin-top:10px;
@@ -73,7 +77,7 @@
   background: var(--card);
 }
 .box-title{ font-size:16px; font-weight:900; color: var(--text-blue); margin:0 0 10px; }
-.box p{ margin:0; line-height:1.7; font-size:14px; color: var(--text); }
+.box p{ margin:0; line-height:1.7; font-size:14px; color: var(--text); overflow-wrap:anywhere; }
 
 .btn{
   width:100%;
@@ -121,18 +125,26 @@ textarea{
   margin-top:10px;
 }
 .comment-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.comment-user{ display:flex; align-items:center; gap:10px; font-weight:900; color: var(--text); }
+.comment-user{ display:flex; align-items:center; gap:10px; font-weight:900; color: var(--text); min-width:0; }
+.comment-user span{ overflow-wrap:anywhere; }
 .comment-user img{
   width:34px; height:34px; border-radius:50%;
   object-fit:cover;
   border:2px solid var(--border);
   background: var(--card);
+  flex: 0 0 auto;
 }
-.comment-time{ color: var(--muted); font-size:12px; }
+.comment-time{ color: var(--muted); font-size:12px; white-space:nowrap; }
 </style>
 
 @php
   $fallback = asset('images/アイコン.png');
+
+  // ✅ 平均評価：小数1桁（/5 を消す）
+  $avg = isset($avgRating) ? (float)$avgRating : 0.0;
+  $avgText = number_format($avg, 1);
+
+  $defaultIcon = asset('images/default_icon.png');
 @endphp
 
 <div class="wrap">
@@ -152,7 +164,7 @@ textarea{
       <div class="meta">
         <div class="row">アーティスト：<b>{{ $song->artist }}</b></div>
         <div class="row">投稿者：<b>{{ $song->user->name ?? 'unknown' }}</b></div>
-        <div class="row">平均評価：<b>{{ $avgRating ?? 0 }} / 5</b></div>
+        <div class="row">平均評価：<b>{{ $avgText }}</b></div>
 
         @if(!empty($song->genre))
           <div class="badge">{{ $song->genre }}</div>
@@ -193,7 +205,7 @@ textarea{
         <div class="box-title">★評価</div>
 
         <div style="font-weight:900;font-size:18px; color: var(--text);">
-          平均：{{ $avgRating ?? 0 }} / 5
+          平均：{{ $avgText }}
           <span class="muted" style="margin-left:10px;">あなたの評価：{{ $myRating ?? '-' }}</span>
         </div>
 
@@ -232,16 +244,16 @@ textarea{
             <div class="comment-head">
               <div class="comment-user">
                 <img
-                  src="{{ $c->user && $c->user->icon ? asset('storage/'.$c->user->icon) : asset('images/default_icon.png') }}"
+                  src="{{ $c->user ? $c->user->icon_url : $defaultIcon }}"
                   alt="icon"
-                  onerror="this.onerror=null;this.src='{{ asset('images/default_icon.png') }}';"
+                  onerror="this.onerror=null;this.src='{{ $defaultIcon }}';"
                 >
-                {{ $c->user->name ?? 'unknown' }}
+                <span>{{ $c->user->name ?? 'unknown' }}</span>
               </div>
               <div class="comment-time">{{ $c->created_at }}</div>
             </div>
 
-            <div style="margin-top:8px; font-size:14px; line-height:1.7; color: var(--text);">
+            <div style="margin-top:8px; font-size:14px; line-height:1.7; color: var(--text); overflow-wrap:anywhere;">
               {{ $c->comment }}
             </div>
           </div>

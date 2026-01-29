@@ -21,9 +21,9 @@ class MusicController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $avgRating = (int) round(
-            Vote::where('song_id', $song->id)->avg('rating') ?? 0
-        );
+        // ✅ 平均評価：切り上げ禁止 → 小数1桁
+        $avg = Vote::where('song_id', $song->id)->avg('rating');
+        $avgRating = $avg ? round((float)$avg, 1) : 0.0;
 
         $myRating = null;
         if (Auth::check()) {
@@ -51,7 +51,6 @@ class MusicController extends Controller
         ));
     }
 
-    // コメント投稿
     public function storeComment(Request $request, $id)
     {
         $request->validate([
@@ -67,7 +66,6 @@ class MusicController extends Controller
         return back();
     }
 
-    // ★評価
     public function storeVote(Request $request, $id)
     {
         $request->validate([
@@ -76,13 +74,12 @@ class MusicController extends Controller
 
         Vote::updateOrCreate(
             ['song_id' => $id, 'user_id' => Auth::id()],
-            ['rating' => $request->rating]
+            ['rating' => (int)$request->rating]
         );
 
         return back();
     }
 
-    // お気に入り ON/OFF（トグル）
     public function toggleFavorite($id)
     {
         $exists = Favorite::where('song_id', $id)
@@ -106,10 +103,12 @@ class MusicController extends Controller
     private function makeThumbnailUrl(Song $song): ?string
     {
         if (!empty($song->thumbnail)) {
+            // storage/ 保存運用の場合
             return asset('storage/' . $song->thumbnail);
         }
 
         $url = $song->url ?? '';
+
         $videoId = $this->extractYouTubeId($url);
         if ($videoId) {
             return "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg";
