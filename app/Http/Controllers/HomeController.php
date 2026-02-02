@@ -8,27 +8,28 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $today = now()->toDateString();
-
-        $dailyRanking = Song::select('songs.*')
-            ->selectSub(function ($q) use ($today) {
+        // ✅ ランキング：サイト全体 TOP5（平均評価が高い順）
+        // 票がない曲は avg_rating が null になるので、最後に回したい場合は orderByRaw を使う
+        $dailyRanking = Song::query()
+            ->select('songs.*')
+            ->selectSub(function ($q) {
                 $q->from('votes')
                     ->whereColumn('votes.song_id', 'songs.id')
-                    ->whereDate('created_at', $today)
                     ->selectRaw('AVG(rating)');
             }, 'avg_rating')
-            ->selectSub(function ($q) use ($today) {
+            ->selectSub(function ($q) {
                 $q->from('votes')
                     ->whereColumn('votes.song_id', 'songs.id')
-                    ->whereDate('created_at', $today)
                     ->selectRaw('COUNT(*)');
-            }, 'today_vote_count')
-            ->orderByDesc('avg_rating')
-            ->orderByDesc('today_vote_count')
+            }, 'vote_count')
+            // ✅ 平均評価の高い順（NULLは最後へ）
+            ->orderByRaw('avg_rating IS NULL')   // NULLを後ろに
+            ->orderByDesc('avg_rating')          // 平均評価 降順
+            ->orderByDesc('vote_count')          // 同率なら票数が多い方
             ->limit(5)
             ->get();
 
-        // ✅ 12件以上でも古い投稿が見れる（ページング）
+        // ✅ 最近投稿：ページネーションは変更しない（12件/ページ）
         $recentSongs = Song::latest()->paginate(12);
 
         return view('home', compact('dailyRanking', 'recentSongs'));
